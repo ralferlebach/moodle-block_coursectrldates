@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Per-instance block configuration reader for block_coursectrldates.
+ *
+ * @package    block_coursectrldates
+ * @copyright  2026 Ralf Erlebach
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace block_coursectrldates\local;
 
 /**
@@ -21,19 +29,8 @@ namespace block_coursectrldates\local;
  *
  * Provides typed accessors for every block setting so that the rest of
  * the codebase never has to touch the raw config object directly.
- *
- * @package    block_coursectrldates
- * @copyright  2026 Ralf Erlebach
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Config reader for block_coursectrldates instances.
  */
 class config_reader {
-
     /** @var int Default number of calendar weeks to display. */
     public const DEFAULT_CALENDAR_WEEKS = 4;
 

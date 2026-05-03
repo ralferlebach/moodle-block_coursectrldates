@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Splash screen renderable for block_coursectrldates.
+ *
+ * @package    block_coursectrldates
+ * @copyright  2026 Ralf Erlebach
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace block_coursectrldates\output;
 
 use moodle_url;
@@ -26,19 +34,8 @@ use templatable;
  *
  * The splash prompts the teacher to review course dates when the course
  * has been newly created, reset, or has newly imported time-limited content.
- *
- * @package    block_coursectrldates
- * @copyright  2026 Ralf Erlebach
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Splash screen renderable.
  */
 class splash_view implements renderable, templatable {
-
     /** @var int Course ID used for building timeline URL. */
     private int $courseid;
 
@@ -66,19 +63,18 @@ class splash_view implements renderable, templatable {
         $timelineurl = new moodle_url('/local/coursectrl/timeline.php');
         $timelineurl->param('courseid', $this->courseid);
 
-        // Dismiss URL – handled via AJAX in a later implementation phase.
         $dismissurl = new moodle_url('/blocks/coursectrldates/action.php');
         $dismissurl->param('action', 'dismiss_splash');
         $dismissurl->param('instanceid', $this->instanceid);
         $dismissurl->param('sesskey', sesskey());
 
         return [
-            'title'        => get_string('splash_title', 'block_coursectrldates'),
-            'message'      => get_string('splash_message', 'block_coursectrldates'),
-            'timelineurl'  => $timelineurl->out(false),
+            'title'         => get_string('splash_title', 'block_coursectrldates'),
+            'message'       => get_string('splash_message', 'block_coursectrldates'),
+            'timelineurl'   => $timelineurl->out(false),
             'timelinelabel' => get_string('open_timeline', 'block_coursectrldates'),
-            'dismissurl'   => $dismissurl->out(false),
-            'dismisslabel' => get_string('splash_dismiss', 'block_coursectrldates'),
+            'dismissurl'    => $dismissurl->out(false),
+            'dismisslabel'  => get_string('splash_dismiss', 'block_coursectrldates'),
         ];
     }
 }

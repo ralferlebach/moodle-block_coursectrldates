@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Splash-screen state manager for block_coursectrldates.
+ *
+ * @package    block_coursectrldates
+ * @copyright  2026 Ralf Erlebach
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace block_coursectrldates\local;
 
 /**
@@ -22,19 +30,8 @@ namespace block_coursectrldates\local;
  * The splash screen is shown once when a new-start event is detected
  * (e.g. course import, reset) and is dismissed by the user. The dismissed
  * state is stored as a Moodle user preference so that it survives sessions.
- *
- * @package    block_coursectrldates
- * @copyright  2026 Ralf Erlebach
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Splash-screen state manager.
  */
 class splash_state {
-
     /** @var string Preference key prefix for the dismissed state. */
     private const PREF_PREFIX = 'block_coursectrldates_splash_dismissed_';
 

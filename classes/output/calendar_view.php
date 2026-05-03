@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Calendar section renderable for block_coursectrldates.
+ *
+ * @package    block_coursectrldates
+ * @copyright  2026 Ralf Erlebach
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace block_coursectrldates\output;
 
 use renderable;
@@ -26,19 +34,8 @@ use templatable;
  * Calendar data and layout are delegated to local_coursectrl. This
  * renderable acts as the data transport between the provider and the
  * Mustache template.
- *
- * @package    block_coursectrldates
- * @copyright  2026 Ralf Erlebach
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Calendar section renderable.
  */
 class calendar_view implements renderable, templatable {
-
     /** @var int Number of weeks to display. */
     private int $weeks;
 

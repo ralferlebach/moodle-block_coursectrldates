@@ -20,12 +20,15 @@
     Chronological list of upcoming course events with shift buttons.
 
     Context variables required for this template:
-    * hasevents   {bool}   Whether the events array contains items.
-    * events      {array}  List of event item objects (see event_item.mustache).
-    * istruncated {bool}   Whether not all available events are shown.
-    * shown       {int}    Number of events currently displayed.
-    * total       {int}    Total number of available events.
-    * timelineurl {string} URL to local_coursectrl timeline.php.
+    * hasevents          {bool}   Whether the events array contains items.
+    * events             {array}  List of event item objects (see event_item.mustache).
+    * istruncated        {bool}   Whether not all available events are shown.
+    * shown              {int}    Number of events currently displayed.
+    * total              {int}    Total number of available events.
+    * timelineurl        {string} URL to local_coursectrl timeline.php.
+    * opentimelinelabel  {string} Label for the open-timeline button.
+    * viewalllabel       {string} Label for the view-all button shown when truncated.
+    * noeventsmessage    {string} Message shown when no events are available.
 
     Example context (json):
     {
@@ -34,14 +37,18 @@
             {
                 "dateformatted": "Mon, 4 Nov 2026, 10:00",
                 "cmname": "Assignment 1",
-                "eventlabel": "opens",
-                "shifturl": "/local/coursectrl/manage.php?courseid=2&cmid=5&action=shift_dates"
+                "eventlabel": "Due date",
+                "shifturl": "/local/coursectrl/manage.php?courseid=2&cmid=5&action=shift_dates",
+                "shiftlabel": "Shift dates"
             }
         ],
         "istruncated": false,
         "shown": 1,
         "total": 1,
-        "timelineurl": "/local/coursectrl/timeline.php?courseid=2"
+        "timelineurl": "/local/coursectrl/timeline.php?courseid=2",
+        "opentimelinelabel": "Open timeline",
+        "viewalllabel": "View all in timeline",
+        "noeventsmessage": "No course dates found in the next 4 weeks."
     }
 }}
 <div class="block-coursectrldates-eventlist" data-region="coursectrldates-eventlist">
@@ -52,17 +59,23 @@
             {{/events}}
         </ul>
         {{#istruncated}}
-            <p class="small text-muted">
+            <p class="small text-muted mb-1">
                 {{shown}} / {{total}}
             </p>
             <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block mb-1">
-                {{#str}} view_all_in_timeline, block_coursectrldates {{/str}}
+                {{viewalllabel}}
             </a>
         {{/istruncated}}
         {{^istruncated}}
             <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block mt-1">
-                {{#str}} open_timeline, block_coursectrldates {{/str}}
+                {{opentimelinelabel}}
             </a>
         {{/istruncated}}
+    {{/hasevents}}
+    {{^hasevents}}
+        <p class="text-muted small mb-2">{{noeventsmessage}}</p>
+        <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block">
+            {{opentimelinelabel}}
+        </a>
     {{/hasevents}}
 </div>

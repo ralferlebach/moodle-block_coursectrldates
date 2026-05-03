@@ -14,28 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace block_coursectrldates\output;
-
-use plugin_renderer_base;
-
 /**
  * Renderer for block_coursectrldates.
- *
- * Thin wrapper around plugin_renderer_base that delegates all rendering
- * to Mustache templates via export_for_template().
  *
  * @package    block_coursectrldates
  * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_coursectrldates\output;
+
+use plugin_renderer_base;
 
 /**
- * Block renderer class.
+ * Block renderer.
+ *
+ * Thin wrapper around plugin_renderer_base that delegates all rendering
+ * to Mustache templates via export_for_template().
  */
 class block_renderer extends plugin_renderer_base {
-
     /**
      * Render the calendar section.
      *

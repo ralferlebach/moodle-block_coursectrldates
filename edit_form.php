@@ -29,7 +29,6 @@
  * event-list mode (count vs. time window), and splash-screen toggle.
  */
 class block_coursectrldates_edit_form extends block_edit_form {
-
     /**
      * Add plugin-specific fields to the configuration form.
      *
@@ -38,7 +37,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
      */
     protected function specific_definition($mform): void {
 
-        // ── Calendar section ─────────────────────────────────────────────.
+        // Calendar section.
         $mform->addElement(
             'header',
             'configheader_calendar',
@@ -62,7 +61,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->setDefault('config_calendar_weeks', 4);
         $mform->hideIf('config_calendar_weeks', 'config_show_calendar', 'notchecked');
 
-        // ── Event list section ────────────────────────────────────────────.
+        // Event list section.
         $mform->addElement(
             'header',
             'configheader_events',
@@ -100,7 +99,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->setDefault('config_list_count', 10);
         $mform->hideIf('config_list_count', 'config_list_mode', 'neq', 'count');
 
-        // ── Splash section ────────────────────────────────────────────────.
+        // Splash section.
         $mform->addElement(
             'header',
             'configheader_splash',

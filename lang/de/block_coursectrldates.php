@@ -43,6 +43,7 @@ $string['config_splash_header'] = 'Splash-Screen';
 $string['event_closes'] = 'schließt';
 $string['event_opens'] = 'öffnet';
 $string['no_events'] = 'In den nächsten {$a} Wochen wurden keine Kurstermine gefunden.';
+$string['no_events_count'] = 'Keine bevorstehenden Kurstermine gefunden.';
 $string['open_timeline'] = 'Timeline öffnen';
 $string['pluginname'] = 'Kurstermine';
 $string['shift_dates'] = 'Termine verschieben';

@@ -17,9 +17,6 @@
 /**
  * Block class for block_coursectrldates.
  *
- * Renders a compact course-date overview on the course page and provides
- * entry points into the date-management features of local_coursectrl.
- *
  * @package    block_coursectrldates
  * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -32,7 +29,6 @@
  * links into the timeline and bulk-date features of local_coursectrl.
  */
 class block_coursectrldates extends block_base {
-
     /**
      * Initialise the block title.
      *
@@ -79,6 +75,8 @@ class block_coursectrldates extends block_base {
      * @return stdClass|null Block content object, or null when not applicable.
      */
     public function get_content(): ?stdClass {
+        global $OUTPUT;
+
         if ($this->content !== null) {
             return $this->content;
         }
@@ -86,7 +84,6 @@ class block_coursectrldates extends block_base {
         $this->content = new stdClass();
         $this->content->footer = '';
 
-        // Require course context.
         $context = $this->context;
         if ($context->contextlevel !== CONTEXT_BLOCK) {
             $this->content->text = '';
@@ -104,8 +101,31 @@ class block_coursectrldates extends block_base {
             return $this->content;
         }
 
-        // Stub: real rendering will be added in a later phase.
-        $this->content->text = get_string('comingsoon', 'block_coursectrldates');
+        $courseid = (int) $coursecontext->instanceid;
+        $config = new \block_coursectrldates\local\config_reader($this->config ?? null);
+        $provider = new \block_coursectrldates\local\event_provider($courseid);
+
+        if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
+            $result = $provider->get_events_by_count($config->list_count());
+            $noeventsmessage = get_string('no_events_count', 'block_coursectrldates');
+        } else {
+            $weeks = $config->list_weeks();
+            $result = $provider->get_events_by_window($weeks);
+            $noeventsmessage = get_string('no_events', 'block_coursectrldates', $weeks);
+        }
+
+        $eventlist = new \block_coursectrldates\output\event_list(
+            $result['events'],
+            $result['total'],
+            $courseid,
+            $noeventsmessage
+        );
+
+        $data = $eventlist->export_for_template($OUTPUT);
+        $this->content->text = $OUTPUT->render_from_template(
+            'block_coursectrldates/event_list',
+            $data
+        );
 
         return $this->content;
     }

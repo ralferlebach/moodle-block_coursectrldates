@@ -14,13 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace block_coursectrldates\output;
-
-use moodle_url;
-use renderable;
-use renderer_base;
-use templatable;
-
 /**
  * Renderable for the chronological list of upcoming course events.
  *
@@ -29,13 +22,21 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_coursectrldates\output;
+
+use moodle_url;
+use renderable;
+use renderer_base;
+use templatable;
 
 /**
  * Event list renderable.
+ *
+ * Transports a sorted list of upcoming activity-date events to the
+ * event_list Mustache template. Builds action URLs for each event's
+ * shift-dates shortcut and for the timeline link.
  */
 class event_list implements renderable, templatable {
-
     /** @var array List of normalised event arrays from event_provider. */
     private array $events;
 
@@ -45,17 +46,27 @@ class event_list implements renderable, templatable {
     /** @var int Course ID used for building shift/timeline URLs. */
     private int $courseid;
 
+    /** @var string Message shown when no events are available. */
+    private string $noeventsmessage;
+
     /**
      * Constructor.
      *
-     * @param array $events     Normalised event arrays to display.
-     * @param int   $totalcount Total available events (for truncation notice).
-     * @param int   $courseid   Course ID for building action URLs.
+     * @param array  $events          Normalised event arrays to display.
+     * @param int    $totalcount      Total available events (for truncation notice).
+     * @param int    $courseid        Course ID for building action URLs.
+     * @param string $noeventsmessage Localised message for the empty state.
      */
-    public function __construct(array $events, int $totalcount, int $courseid) {
+    public function __construct(
+        array $events,
+        int $totalcount,
+        int $courseid,
+        string $noeventsmessage = ''
+    ) {
         $this->events = $events;
         $this->totalcount = $totalcount;
         $this->courseid = $courseid;
+        $this->noeventsmessage = $noeventsmessage;
     }
 
     /**
@@ -71,6 +82,10 @@ class event_list implements renderable, templatable {
         $timelineurl = new moodle_url('/local/coursectrl/timeline.php');
         $timelineurl->param('courseid', $this->courseid);
 
+        $opentimelinelabel = get_string('open_timeline', 'block_coursectrldates');
+        $viewalllabel = get_string('view_all_in_timeline', 'block_coursectrldates');
+        $shiftlabel = get_string('shift_dates', 'block_coursectrldates');
+
         $items = [];
         foreach ($this->events as $event) {
             $shifturl = new moodle_url('/local/coursectrl/manage.php');
@@ -79,21 +94,28 @@ class event_list implements renderable, templatable {
             $shifturl->param('action', 'shift_dates');
 
             $items[] = [
-                'timestamp'    => $event['timestamp'] ?? 0,
-                'dateformatted' => userdate($event['timestamp'] ?? 0, get_string('strftimedaydatetime', 'core_langconfig')),
-                'cmname'       => $event['cmname'] ?? '',
-                'eventlabel'   => $event['eventlabel'] ?? '',
-                'shifturl'     => $shifturl->out(false),
+                'timestamp'     => $event['timestamp'] ?? 0,
+                'dateformatted' => userdate(
+                    $event['timestamp'] ?? 0,
+                    get_string('strftimedaydatetime', 'core_langconfig')
+                ),
+                'cmname'        => $event['cmname'] ?? '',
+                'eventlabel'    => $event['eventlabel'] ?? '',
+                'shifturl'      => $shifturl->out(false),
+                'shiftlabel'    => $shiftlabel,
             ];
         }
 
         return [
-            'hasevents'      => !empty($items),
-            'events'         => $items,
-            'istruncated'    => $istruncated,
-            'shown'          => $shown,
-            'total'          => $this->totalcount,
-            'timelineurl'    => $timelineurl->out(false),
+            'hasevents'         => !empty($items),
+            'events'            => $items,
+            'istruncated'       => $istruncated,
+            'shown'             => $shown,
+            'total'             => $this->totalcount,
+            'timelineurl'       => $timelineurl->out(false),
+            'opentimelinelabel' => $opentimelinelabel,
+            'viewalllabel'      => $viewalllabel,
+            'noeventsmessage'   => $this->noeventsmessage,
         ];
     }
 }

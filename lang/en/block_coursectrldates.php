@@ -43,6 +43,7 @@ $string['config_splash_header'] = 'Splash screen';
 $string['event_closes'] = 'closes';
 $string['event_opens'] = 'opens';
 $string['no_events'] = 'No course dates found in the next {$a} weeks.';
+$string['no_events_count'] = 'No upcoming course dates found.';
 $string['open_timeline'] = 'Open timeline';
 $string['pluginname'] = 'Course dates';
 $string['shift_dates'] = 'Shift dates';
