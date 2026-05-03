@@ -103,27 +103,11 @@ class block_coursectrldates extends block_base {
 
         $courseid = (int) $coursecontext->instanceid;
         $config = new \block_coursectrldates\local\config_reader($this->config ?? null);
-        $provider = new \block_coursectrldates\local\event_provider($courseid);
+        $renderable = new \block_coursectrldates\output\block_content($courseid, $config);
 
-        if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
-            $result = $provider->get_events_by_count($config->list_count());
-            $noeventsmessage = get_string('no_events_count', 'block_coursectrldates');
-        } else {
-            $weeks = $config->list_weeks();
-            $result = $provider->get_events_by_window($weeks);
-            $noeventsmessage = get_string('no_events', 'block_coursectrldates', $weeks);
-        }
-
-        $eventlist = new \block_coursectrldates\output\event_list(
-            $result['events'],
-            $result['total'],
-            $courseid,
-            $noeventsmessage
-        );
-
-        $data = $eventlist->export_for_template($OUTPUT);
+        $data = $renderable->export_for_template($OUTPUT);
         $this->content->text = $OUTPUT->render_from_template(
-            'block_coursectrldates/event_list',
+            'block_coursectrldates/block_content',
             $data
         );
 

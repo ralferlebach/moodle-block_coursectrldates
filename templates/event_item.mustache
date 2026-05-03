@@ -17,13 +17,14 @@
 {{!
     @template block_coursectrldates/event_item
 
-    A single event row in the course-dates event list.
+    Single event row. Not used as a partial since event_list.mustache v0.1.4
+    inlines its entries directly; kept for standalone rendering compatibility.
 
     Context variables required for this template:
     * dateformatted {string} Localised date and time string.
     * cmname        {string} Activity display name.
-    * eventlabel    {string} Localised event type description (e.g. "Due date").
-    * shifturl      {string} URL to the shift-dates action in local_coursectrl.
+    * eventlabel    {string} Localised event type description.
+    * shifturl      {string} URL to the timeline in local_coursectrl.
     * shiftlabel    {string} Localised label for the shift button.
 
     Example context (json):
@@ -31,15 +32,15 @@
         "dateformatted": "Mon, 4 Nov 2026, 10:00",
         "cmname": "Assignment 1",
         "eventlabel": "Due date",
-        "shifturl": "/local/coursectrl/manage.php?courseid=2&cmid=5&action=shift_dates",
+        "shifturl": "/local/coursectrl/timeline.php?courseid=2",
         "shiftlabel": "Shift dates"
     }
 }}
-<li class="block-coursectrldates-event mb-2">
+<div class="block-coursectrldates-event mb-2">
     <div class="small text-muted">{{dateformatted}}</div>
     <div class="fw-bold">{{cmname}}</div>
     <div class="small">{{eventlabel}}</div>
     <a href="{{shifturl}}" class="btn btn-sm btn-outline-primary mt-1">
         {{shiftlabel}}
     </a>
-</li>
+</div>
