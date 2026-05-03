@@ -17,34 +17,64 @@
 {{!
     @template block_coursectrldates/splash
 
-    Splash screen displayed when a new-start event is detected.
+    Setup-help (Einrichtungshilfe) notification card for block_coursectrldates.
+
+    Shown above block content when a trigger fires and the teacher has not
+    yet permanently dismissed it.
+
+    Actions:
+    * "Ja"     — AMD dismisses permanently and navigates to timeline.
+    * "Später" — AMD removes the card from DOM, no server call, reappears next load.
+    * "Nein"   — AMD dismisses permanently without navigation.
 
     Context variables required for this template:
-    * title        {string} Splash heading text.
-    * message      {string} Body message encouraging the teacher to check dates.
-    * timelineurl  {string} URL to local_coursectrl timeline.php.
-    * timelinelabel {string} Label for the timeline button.
-    * dismissurl   {string} URL / AJAX endpoint to dismiss the splash.
-    * dismisslabel {string} Label for the dismiss button.
+    * question     {string}
+    * timelineurl  {string}
+    * dismissurl   {string}
+    * label_yes    {string}
+    * label_later  {string}
+    * label_no     {string}
 
     Example context (json):
     {
-        "title": "Check course dates",
-        "message": "This course has been newly created or reset.",
+        "question": "Jetzt in der Kursablauf-Zentrale alle Termine einrichten?",
         "timelineurl": "/local/coursectrl/timeline.php?courseid=2",
-        "timelinelabel": "Open timeline",
-        "dismissurl": "/blocks/coursectrldates/action.php?action=dismiss_splash&instanceid=3",
-        "dismisslabel": "Dismiss"
+        "dismissurl": "/blocks/coursectrldates/action.php?action=dismiss_help&instanceid=3&courseid=2",
+        "label_yes": "Ja",
+        "label_later": "Später",
+        "label_no": "Nein"
     }
 }}
-<div class="block-coursectrldates-splash alert alert-info" data-region="coursectrldates-splash">
-    <strong>{{title}}</strong>
-    <p class="mt-1 mb-2">{{message}}</p>
-    <a href="{{timelineurl}}" class="btn btn-sm btn-primary me-1">
-        {{timelinelabel}}
-    </a>
-    <a href="{{dismissurl}}" class="btn btn-sm btn-outline-secondary"
-       data-action="dismiss-splash">
-        {{dismisslabel}}
-    </a>
+<div class="block-coursectrldates-help mb-2"
+     data-region="coursectrldates-splash">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body py-3 px-3">
+            <div class="d-flex gap-2 align-items-start">
+                <span class="text-primary flex-shrink-0 mt-1">
+                    <i class="fa fa-calendar fa-fw fa-lg"></i>
+                </span>
+                <div class="flex-grow-1 min-w-0">
+                    <p class="mb-2 fw-semibold small text-body">{{question}}</p>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <a href="{{timelineurl}}"
+                           class="btn btn-primary btn-sm"
+                           data-action="dismiss-help-and-go"
+                           data-dismiss-url="{{dismissurl}}">
+                            {{label_yes}}
+                        </a>
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                data-action="defer-help">
+                            {{label_later}}
+                        </button>
+                        <a href="{{dismissurl}}"
+                           class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
+                           data-action="dismiss-help">
+                            {{label_no}}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

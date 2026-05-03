@@ -40,6 +40,9 @@ class config_reader {
     /** @var int Default fixed event count for count mode. */
     public const DEFAULT_LIST_COUNT = 10;
 
+    /** @var int Default help trigger time window in weeks. */
+    public const DEFAULT_HELP_WEEKS = 4;
+
     /** @var string List mode: show all events within a time window. */
     public const MODE_TIMEWINDOW = 'timewindow';
 
@@ -111,20 +114,57 @@ class config_reader {
     }
 
     /**
-     * Whether the splash screen feature is enabled.
+     * Whether the setup-help feature is enabled.
      *
      * @return bool
      */
-    public function show_splash(): bool {
-        return !empty($this->config->show_splash);
+    public function show_help(): bool {
+        return !empty($this->config->show_help);
     }
 
     /**
-     * Whether the splash state should be reset on the next page load.
+     * Time window (weeks) within which triggers are evaluated (1–6).
+     *
+     * @return int
+     */
+    public function help_window_weeks(): int {
+        $weeks = (int) ($this->config->help_window_weeks ?? self::DEFAULT_HELP_WEEKS);
+        return max(1, min(6, $weeks));
+    }
+
+    /**
+     * Whether the "course newly created or imported" trigger is active.
      *
      * @return bool
      */
-    public function reset_splash(): bool {
-        return !empty($this->config->reset_splash);
+    public function help_trigger_new(): bool {
+        return !empty($this->config->help_trigger_new);
+    }
+
+    /**
+     * Whether the "course reset" trigger is active.
+     *
+     * @return bool
+     */
+    public function help_trigger_reset(): bool {
+        return !empty($this->config->help_trigger_reset);
+    }
+
+    /**
+     * Whether the "activities with time dependencies imported" trigger is active.
+     *
+     * @return bool
+     */
+    public function help_trigger_timedeps(): bool {
+        return !empty($this->config->help_trigger_timedeps);
+    }
+
+    /**
+     * Whether the setup-help should be reset for the current user on next load.
+     *
+     * @return bool
+     */
+    public function reset_help(): bool {
+        return !empty($this->config->reset_help);
     }
 }

@@ -68,7 +68,3 @@ temp/
 *.gz
 *.tgz
 *.7z
-
-# Moodle backup files – only the canonical CCH fixture belongs in the repo
-*.mbz
-!tests/fixtures/cch_fixture_2026.mbz

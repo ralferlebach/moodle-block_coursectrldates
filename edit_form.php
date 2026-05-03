@@ -25,8 +25,8 @@
 /**
  * Instance configuration form.
  *
- * Allows per-instance settings: calendar visibility, week count,
- * event-list mode (count vs. time window), and splash-screen toggle.
+ * Settings: calendar visibility, event-list mode, and the setup-help
+ * (Einrichtungshilfe) feature with configurable trigger conditions.
  */
 class block_coursectrldates_edit_form extends block_edit_form {
     /**
@@ -99,26 +99,62 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->setDefault('config_list_count', 10);
         $mform->hideIf('config_list_count', 'config_list_mode', 'neq', 'count');
 
-        // Splash section.
+        // Setup-help section (Einrichtungshilfe).
         $mform->addElement(
             'header',
-            'configheader_splash',
-            get_string('config_splash_header', 'block_coursectrldates')
+            'configheader_help',
+            get_string('config_help_header', 'block_coursectrldates')
         );
 
         $mform->addElement(
             'advcheckbox',
-            'config_show_splash',
-            get_string('config_show_splash', 'block_coursectrldates')
+            'config_show_help',
+            get_string('config_show_help', 'block_coursectrldates')
         );
-        $mform->setDefault('config_show_splash', 1);
+        $mform->setDefault('config_show_help', 1);
+
+        // Time window for trigger evaluation.
+        $mform->addElement(
+            'select',
+            'config_help_window_weeks',
+            get_string('config_help_window_weeks', 'block_coursectrldates'),
+            $weekoptions
+        );
+        $mform->setDefault('config_help_window_weeks', 4);
+        $mform->hideIf('config_help_window_weeks', 'config_show_help', 'notchecked');
+
+        // Trigger checkboxes.
+        $mform->addElement(
+            'advcheckbox',
+            'config_help_trigger_new',
+            get_string('config_help_trigger_new', 'block_coursectrldates')
+        );
+        $mform->setDefault('config_help_trigger_new', 1);
+        $mform->hideIf('config_help_trigger_new', 'config_show_help', 'notchecked');
 
         $mform->addElement(
             'advcheckbox',
-            'config_reset_splash',
-            get_string('config_reset_splash', 'block_coursectrldates')
+            'config_help_trigger_reset',
+            get_string('config_help_trigger_reset', 'block_coursectrldates')
         );
-        $mform->setDefault('config_reset_splash', 0);
-        $mform->hideIf('config_reset_splash', 'config_show_splash', 'notchecked');
+        $mform->setDefault('config_help_trigger_reset', 1);
+        $mform->hideIf('config_help_trigger_reset', 'config_show_help', 'notchecked');
+
+        $mform->addElement(
+            'advcheckbox',
+            'config_help_trigger_timedeps',
+            get_string('config_help_trigger_timedeps', 'block_coursectrldates')
+        );
+        $mform->setDefault('config_help_trigger_timedeps', 1);
+        $mform->hideIf('config_help_trigger_timedeps', 'config_show_help', 'notchecked');
+
+        // Manual reset.
+        $mform->addElement(
+            'advcheckbox',
+            'config_reset_help',
+            get_string('config_reset_help', 'block_coursectrldates')
+        );
+        $mform->setDefault('config_reset_help', 0);
+        $mform->hideIf('config_reset_help', 'config_show_help', 'notchecked');
     }
 }

@@ -15,21 +15,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version definition for block_coursectrldates.
+ * Privacy API implementation for block_coursectrldates.
  *
  * @package    block_coursectrldates
  * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace block_coursectrldates\privacy;
 
-$plugin->component    = 'block_coursectrldates';
-$plugin->version      = 2026050312;
-$plugin->requires     = 2024042200; // Moodle 4.5.
-$plugin->dependencies = [
-    'local_coursectrl' => ANY_VERSION,
-];
-$plugin->supported = [405, 502]; // Moodle 4.5 through 5.2.
-$plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.1.12';
+use core_privacy\local\metadata\null_provider;
+
+/**
+ * Privacy provider for block_coursectrldates.
+ *
+ * The block stores no personal data of its own. UI-state preferences
+ * (splash dismissed flag) are stored through Moodle's core user
+ * preference API, which handles their export and deletion centrally.
+ */
+class provider implements null_provider {
+    /**
+     * Return the component string for the null_provider reason.
+     *
+     * @return string
+     */
+    public static function get_reason(): string {
+        return 'privacy:metadata';
+    }
+}

@@ -19,21 +19,23 @@
 
     Outer wrapper for the course-dates block content.
 
-    All context variables from the calendar and event-list sub-templates
-    live at the top level so that the included partials can access them
-    through standard Mustache context inheritance.
+    The setup-help notification (splash) is shown above the content when
+    a trigger fires. Calendar and event list are ALWAYS rendered — the help
+    notification is an additive overlay, not a content replacement.
 
     Context variables required for this template:
-    * showsplash   {bool}   Show the splash screen instead of normal content.
-    * showcalendar {bool}   Show the calendar partial.
-    * months       {array}  Passed through to block_coursectrldates/calendar.
-    * hasdays      {bool}   Passed through to block_coursectrldates/event_list.
-    * days         {array}  Passed through to block_coursectrldates/event_list.
-    * (all other event_list variables also at top level)
+    * showhelp     {bool}    Show the setup-help notification.
+    * helpdata     {object}  Scoped context for block_coursectrldates/splash.
+    * showcalendar {bool}    Show the calendar partial.
+    * months       {array}   Calendar months.
+    * hasdays      {bool}    Event-list — see block_coursectrldates/event_list.
+    * days         {array}   Event-list — see block_coursectrldates/event_list.
+    * (all other event_list context variables also at top level)
 
     Example context (json):
     {
-        "showsplash": false,
+        "showhelp": false,
+        "helpdata": null,
         "showcalendar": false,
         "hascalendar": false,
         "months": [],
@@ -48,18 +50,22 @@
         "noeventsmessage": "No dates found.",
         "shiftslotlabel": "Shift slot",
         "shiftfollowinglabel": "Shift following",
-        "shiftentrylabel": "Shift date",
-        "splash": {}
+        "shiftentrylabel": "Shift date"
     }
 }}
 <div class="block-coursectrldates" data-region="block-coursectrldates">
-    {{#showsplash}}
-        {{> block_coursectrldates/splash }}
-    {{/showsplash}}
-    {{^showsplash}}
-        {{#showcalendar}}
-            {{> block_coursectrldates/calendar }}
-        {{/showcalendar}}
-        {{> block_coursectrldates/event_list }}
-    {{/showsplash}}
+    {{#showhelp}}
+        {{#helpdata}}
+            {{> block_coursectrldates/splash }}
+        {{/helpdata}}
+    {{/showhelp}}
+    {{#showcalendar}}
+        {{> block_coursectrldates/calendar }}
+    {{/showcalendar}}
+    {{> block_coursectrldates/event_list }}
 </div>
+{{#js}}
+require(['block_coursectrldates/block'], function(B) {
+    B.init(document.querySelector('[data-region="block-coursectrldates"]'));
+});
+{{/js}}

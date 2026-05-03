@@ -28,6 +28,10 @@
  * Renders a mini calendar and a chronological list of upcoming activity
  * dates. A single call to local_coursectrl's inventory and date-collector
  * services feeds both sections so the DB is hit only once per page load.
+ *
+ * The course ID is resolved via $PAGE->context so the block works both on
+ * the course view page and on local_coursectrl management pages (timeline,
+ * manage, shift, etc.) that set $PAGE->context = context_course.
  */
 class block_coursectrldates extends block_base {
     /**
@@ -58,30 +62,53 @@ class block_coursectrldates extends block_base {
     }
 
     /**
-     * Restrict this block to course pages only.
+     * Return the page formats on which this block may appear.
      *
      * @return array
      */
     public function applicable_formats(): array {
         return [
-            'course-view' => true,
-            'site'        => false,
-            'my'          => false,
+            'course-view'        => true,
+            'local-coursectrl-*' => true,
+            'site'               => false,
+            'my'                 => false,
         ];
+    }
+
+    /**
+     * Intercept config save to handle the reset-help option.
+     *
+     * @param stdClass $data Form data.
+     * @param bool     $nolongerused Legacy parameter (unused).
+     * @return stdClass
+     */
+    public function instance_config_save($data, $nolongerused = false) {
+        global $USER;
+
+        if (!empty($data->config_reset_help)) {
+            $state = new \block_coursectrldates\local\splash_state(
+                $this->instance->id,
+                $USER->id
+            );
+            $state->reset();
+            $data->config_reset_help = 0;
+        }
+
+        return parent::instance_config_save($data, $nolongerused);
     }
 
     /**
      * Produce the block content.
      *
-     * A single inventory pass via local_coursectrl's inventory_service and
-     * date_collector feeds both the calendar grid and the event list. The
-     * result is rendered via block_coursectrldates/block (which includes
-     * the calendar and event_list partials).
+     * The course ID is derived from $PAGE->context so the block works
+     * correctly on both course-view pages and CCH pages.
      *
-     * @return stdClass|null Block content object, or null when not applicable.
+     * The event list shows only upcoming events (timestamp >= now).
+     *
+     * @return stdClass|null
      */
     public function get_content(): ?stdClass {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE, $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -90,34 +117,33 @@ class block_coursectrldates extends block_base {
         $this->content = new stdClass();
         $this->content->footer = '';
 
-        $context = $this->context;
-        if ($context->contextlevel !== CONTEXT_BLOCK) {
+        // Resolve course context from the current page. $PAGE->context is set
+        // to context_course by both course-view pages and CCH pages.
+        $coursecontext = $PAGE->context;
+        if ($coursecontext->contextlevel !== CONTEXT_COURSE) {
+            $coursecontext = $coursecontext->get_course_context(false);
+        }
+        if (!$coursecontext) {
             $this->content->text = '';
             return $this->content;
         }
 
-        $coursecontext = $context->get_parent_context();
-        if (!$coursecontext || $coursecontext->contextlevel !== CONTEXT_COURSE) {
-            $this->content->text = '';
-            return $this->content;
-        }
-
-        if (!has_capability('block/coursectrldates:view', $context)) {
+        if (!has_capability('block/coursectrldates:view', $this->context)) {
             $this->content->text = '';
             return $this->content;
         }
 
         $courseid = (int) $coursecontext->instanceid;
-        $config = new \block_coursectrldates\local\config_reader($this->config ?? null);
-        $now = time();
+        $config   = new \block_coursectrldates\local\config_reader($this->config ?? null);
+        $now      = time();
 
         // Single inventory pass shared by calendar and event list.
-        $snapshot = (new \local_coursectrl\local\inventory\inventory_service())
+        $snapshot   = (new \local_coursectrl\local\inventory\inventory_service())
             ->build_for_course($courseid);
         $allentries = (new \local_coursectrl\local\analysis\date_collector())
             ->collect($snapshot->cms);
 
-        // Calendar: build month grid over the full course range.
+        // Calendar: full course range, all entries.
         $months = [];
         if ($config->show_calendar()) {
             $months = (new \local_coursectrl\local\analysis\calendar_grid_builder())->build(
@@ -129,44 +155,44 @@ class block_coursectrldates extends block_base {
             );
         }
 
-        // Event list: filter allentries by configured mode.
+        // Event list: upcoming events only (timestamp >= now).
+        // Use foreach instead of array_filter+closure to avoid edge cases
+        // with static closures inside non-static methods.
         if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
-            $futureentries = array_values(array_filter(
-                $allentries,
-                static function (array $e) use ($now): bool {
-                    return (int) $e['timestamp'] >= $now;
-                }
-            ));
-            $total = count($futureentries);
-            $showentries = array_slice($futureentries, 0, $config->list_count());
+            $timeto = $now + (52 * WEEKSECS);
             $noeventsmessage = get_string('no_events_count', 'block_coursectrldates');
         } else {
-            $weeks = $config->list_weeks();
+            $weeks  = $config->list_weeks();
             $timeto = $now + ($weeks * WEEKSECS);
-            $showentries = array_values(array_filter(
-                $allentries,
-                static function (array $e) use ($now, $timeto): bool {
-                    $ts = (int) $e['timestamp'];
-                    return $ts >= $now && $ts < $timeto;
-                }
-            ));
-            $total = count($showentries);
             $noeventsmessage = get_string('no_events', 'block_coursectrldates', $weeks);
         }
 
-        $events = array_map(
-            static function (array $e): array {
-                return [
-                    'timestamp'  => (int) $e['timestamp'],
-                    'cmid'       => (int) $e['cmid'],
-                    'cmname'     => (string) $e['name'],
-                    'modname'    => (string) $e['modname'],
-                    'eventtype'  => (string) $e['field'],
-                    'eventlabel' => (string) $e['fieldlabel'],
-                ];
-            },
-            $showentries
-        );
+        $futureentries = [];
+        foreach ($allentries as $entry) {
+            $ts = (int) $entry['timestamp'];
+            if ($ts >= $now && $ts < $timeto) {
+                $futureentries[] = $entry;
+            }
+        }
+
+        $total = count($futureentries);
+        if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
+            $showentries = array_slice($futureentries, 0, $config->list_count());
+        } else {
+            $showentries = $futureentries;
+        }
+
+        $events = [];
+        foreach ($showentries as $e) {
+            $events[] = [
+                'timestamp'  => (int) $e['timestamp'],
+                'cmid'       => (int) $e['cmid'],
+                'cmname'     => (string) $e['name'],
+                'modname'    => (string) $e['modname'],
+                'eventtype'  => (string) $e['field'],
+                'eventlabel' => (string) $e['fieldlabel'],
+            ];
+        }
 
         $eventlist = new \block_coursectrldates\output\event_list(
             $events,
@@ -175,9 +201,41 @@ class block_coursectrldates extends block_base {
             $noeventsmessage
         );
 
-        // Merge calendar and event-list context into the block template.
+        // Setup-help: evaluate triggers and dismissed state.
+        $showhelp = false;
+        $helpdata = null;
+        if ($config->show_help()) {
+            $splashstate = new \block_coursectrldates\local\splash_state(
+                $this->instance->id,
+                $USER->id
+            );
+            if (!$splashstate->is_dismissed()
+                && $this->compute_show_help($courseid, $config, $snapshot->cms)) {
+                $showhelp = true;
+
+                $dismissurl = new \moodle_url('/blocks/coursectrldates/action.php');
+                $dismissurl->param('action', 'dismiss_help');
+                $dismissurl->param('instanceid', $this->instance->id);
+                $dismissurl->param('courseid', $courseid);
+                $dismissurl->param('sesskey', sesskey());
+
+                $timelineurl = new \moodle_url('/local/coursectrl/timeline.php');
+                $timelineurl->param('courseid', $courseid);
+
+                $helpdata = [
+                    'question'    => get_string('help_question', 'block_coursectrldates'),
+                    'timelineurl' => $timelineurl->out(false),
+                    'dismissurl'  => $dismissurl->out(false),
+                    'label_yes'   => get_string('help_yes', 'block_coursectrldates'),
+                    'label_later' => get_string('help_later', 'block_coursectrldates'),
+                    'label_no'    => get_string('help_no', 'block_coursectrldates'),
+                ];
+            }
+        }
+
         $data = $eventlist->export_for_template($OUTPUT);
-        $data['showsplash']   = false;
+        $data['showhelp']     = $showhelp;
+        $data['helpdata']     = $helpdata;
         $data['showcalendar'] = $config->show_calendar() && !empty($months);
         $data['hascalendar']  = !empty($months);
         $data['months']       = $months;
@@ -188,6 +246,69 @@ class block_coursectrldates extends block_base {
         );
 
         return $this->content;
+    }
+
+    /**
+     * Evaluate whether any setup-help trigger fires for this course.
+     *
+     * @param int                                           $courseid Course ID.
+     * @param \block_coursectrldates\local\config_reader   $config   Block config.
+     * @param \local_coursectrl\local\entity\cm_item[]     $cms      Course modules.
+     * @return bool
+     */
+    private function compute_show_help(
+        int $courseid,
+        \block_coursectrldates\local\config_reader $config,
+        array $cms
+    ): bool {
+        global $DB;
+
+        $winstart = time() - ($config->help_window_weeks() * WEEKSECS);
+
+        if ($config->help_trigger_new()) {
+            $timecreated = (int) $DB->get_field('course', 'timecreated', ['id' => $courseid]);
+            if ($timecreated >= $winstart) {
+                return true;
+            }
+        }
+
+        if ($config->help_trigger_reset()) {
+            $logtable = 'logstore_standard_log';
+            if ($DB->get_manager()->table_exists($logtable)) {
+                $count = $DB->count_records_select(
+                    $logtable,
+                    "courseid = :cid AND component = :comp
+                     AND action = :act AND target = :tgt
+                     AND timecreated >= :ts",
+                    [
+                        'cid'  => $courseid,
+                        'comp' => 'core',
+                        'act'  => 'reset',
+                        'tgt'  => 'course',
+                        'ts'   => $winstart,
+                    ]
+                );
+                if ($count > 0) {
+                    return true;
+                }
+            }
+        }
+
+        if ($config->help_trigger_timedeps() && !empty($cms)) {
+            $cmids = array_keys($cms);
+            [$insql, $inparams] = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
+            $inparams['winstart'] = $winstart;
+            $count = $DB->count_records_select(
+                'course_modules',
+                "id {$insql} AND added >= :winstart",
+                $inparams
+            );
+            if ($count > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
