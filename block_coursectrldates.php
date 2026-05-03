@@ -25,8 +25,9 @@
 /**
  * Course dates block.
  *
- * Displays the next upcoming dates for a course and offers shortcut
- * links into the timeline and bulk-date features of local_coursectrl.
+ * Renders a mini calendar and a chronological list of upcoming activity
+ * dates. A single call to local_coursectrl's inventory and date-collector
+ * services feeds both sections so the DB is hit only once per page load.
  */
 class block_coursectrldates extends block_base {
     /**
@@ -39,7 +40,7 @@ class block_coursectrldates extends block_base {
     }
 
     /**
-     * Return true – this block has a configuration form.
+     * Return false – no site-level configuration form.
      *
      * @return bool
      */
@@ -72,6 +73,11 @@ class block_coursectrldates extends block_base {
     /**
      * Produce the block content.
      *
+     * A single inventory pass via local_coursectrl's inventory_service and
+     * date_collector feeds both the calendar grid and the event list. The
+     * result is rendered via block_coursectrldates/block (which includes
+     * the calendar and event_list partials).
+     *
      * @return stdClass|null Block content object, or null when not applicable.
      */
     public function get_content(): ?stdClass {
@@ -103,11 +109,81 @@ class block_coursectrldates extends block_base {
 
         $courseid = (int) $coursecontext->instanceid;
         $config = new \block_coursectrldates\local\config_reader($this->config ?? null);
-        $renderable = new \block_coursectrldates\output\block_content($courseid, $config);
+        $now = time();
 
-        $data = $renderable->export_for_template($OUTPUT);
+        // Single inventory pass shared by calendar and event list.
+        $snapshot = (new \local_coursectrl\local\inventory\inventory_service())
+            ->build_for_course($courseid);
+        $allentries = (new \local_coursectrl\local\analysis\date_collector())
+            ->collect($snapshot->cms);
+
+        // Calendar: build month grid over the full course range.
+        $months = [];
+        if ($config->show_calendar()) {
+            $months = (new \local_coursectrl\local\analysis\calendar_grid_builder())->build(
+                (int) $snapshot->course->startdate,
+                $snapshot->course->enddate,
+                $allentries,
+                $now,
+                new \local_coursectrl\manager\calendar_manager()
+            );
+        }
+
+        // Event list: filter allentries by configured mode.
+        if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
+            $futureentries = array_values(array_filter(
+                $allentries,
+                static function (array $e) use ($now): bool {
+                    return (int) $e['timestamp'] >= $now;
+                }
+            ));
+            $total = count($futureentries);
+            $showentries = array_slice($futureentries, 0, $config->list_count());
+            $noeventsmessage = get_string('no_events_count', 'block_coursectrldates');
+        } else {
+            $weeks = $config->list_weeks();
+            $timeto = $now + ($weeks * WEEKSECS);
+            $showentries = array_values(array_filter(
+                $allentries,
+                static function (array $e) use ($now, $timeto): bool {
+                    $ts = (int) $e['timestamp'];
+                    return $ts >= $now && $ts < $timeto;
+                }
+            ));
+            $total = count($showentries);
+            $noeventsmessage = get_string('no_events', 'block_coursectrldates', $weeks);
+        }
+
+        $events = array_map(
+            static function (array $e): array {
+                return [
+                    'timestamp'  => (int) $e['timestamp'],
+                    'cmid'       => (int) $e['cmid'],
+                    'cmname'     => (string) $e['name'],
+                    'modname'    => (string) $e['modname'],
+                    'eventtype'  => (string) $e['field'],
+                    'eventlabel' => (string) $e['fieldlabel'],
+                ];
+            },
+            $showentries
+        );
+
+        $eventlist = new \block_coursectrldates\output\event_list(
+            $events,
+            $total,
+            $courseid,
+            $noeventsmessage
+        );
+
+        // Merge calendar and event-list context into the block template.
+        $data = $eventlist->export_for_template($OUTPUT);
+        $data['showsplash']   = false;
+        $data['showcalendar'] = $config->show_calendar() && !empty($months);
+        $data['hascalendar']  = !empty($months);
+        $data['months']       = $months;
+
         $this->content->text = $OUTPUT->render_from_template(
-            'block_coursectrldates/block_content',
+            'block_coursectrldates/block',
             $data
         );
 
@@ -115,7 +191,7 @@ class block_coursectrldates extends block_base {
     }
 
     /**
-     * Allow multiple instances of this block in one course.
+     * Prevent multiple instances in one course.
      *
      * @return bool
      */

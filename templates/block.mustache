@@ -19,22 +19,37 @@
 
     Outer wrapper for the course-dates block content.
 
+    All context variables from the calendar and event-list sub-templates
+    live at the top level so that the included partials can access them
+    through standard Mustache context inheritance.
+
     Context variables required for this template:
-    * showsplash   {bool}   Whether to display the splash view instead of normal content.
-    * showcalendar {bool}   Whether to render the calendar section.
-    * calendar     {object} Context for the calendar sub-template.
-    * eventlist    {object} Context for the event_list sub-template.
-    * splash       {object} Context for the splash sub-template.
+    * showsplash   {bool}   Show the splash screen instead of normal content.
+    * showcalendar {bool}   Show the calendar partial.
+    * months       {array}  Passed through to block_coursectrldates/calendar.
+    * hasdays      {bool}   Passed through to block_coursectrldates/event_list.
+    * days         {array}  Passed through to block_coursectrldates/event_list.
+    * (all other event_list variables also at top level)
 
     Example context (json):
     {
         "showsplash": false,
-        "showcalendar": true,
-        "calendar": { "weeks": 4, "hascalendar": false },
-        "eventlist": { "hasevents": false, "events": [], "istruncated": false,
-                       "shown": 0, "total": 0, "timelineurl": "#" },
-        "splash": { "title": "", "message": "", "timelineurl": "#",
-                    "timelinelabel": "", "dismissurl": "#", "dismisslabel": "" }
+        "showcalendar": false,
+        "hascalendar": false,
+        "months": [],
+        "hasdays": false,
+        "days": [],
+        "istruncated": false,
+        "shown": 0,
+        "total": 0,
+        "timelineurl": "#",
+        "opentimelinelabel": "Open timeline",
+        "viewalllabel": "View all in timeline",
+        "noeventsmessage": "No dates found.",
+        "shiftslotlabel": "Shift slot",
+        "shiftfollowinglabel": "Shift following",
+        "shiftentrylabel": "Shift date",
+        "splash": {}
     }
 }}
 <div class="block-coursectrldates" data-region="block-coursectrldates">
