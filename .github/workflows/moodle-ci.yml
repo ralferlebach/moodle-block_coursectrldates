@@ -1,5 +1,5 @@
 ##############################################################################
-# GitHub Actions CI – block_coursectrl (Course Control Hub block)
+# GitHub Actions CI – block_coursectrldates (Course Control Hub – Dates Block)
 #
 # Matrix:
 #   Moodle:  4.5, 5.0, 5.1, 5.2
@@ -7,8 +7,8 @@
 #   DB:      MariaDB 10.11  |  PostgreSQL 16
 #
 # Dependency:
-#   block_coursectrl depends on local_coursectrl. The local plugin is registered
-#   before Moodle installation via moodle-plugin-ci add-plugin.
+#   block_coursectrldates depends on local_coursectrl. The local plugin is
+#   registered before Moodle installation via moodle-plugin-ci add-plugin.
 #
 #   Optional GitHub repository variables:
 #     CCH_CORE_REPO    Override default dependency repository.
@@ -344,7 +344,7 @@ jobs:
         run: |
           moodle-plugin-ci behat \
             --profile chrome \
-            --tags "@block_coursectrl and not @broken" \
+            --tags "@block_coursectrldates and not @broken" \
             --start-servers
 
       - name: Upload failure screenshots

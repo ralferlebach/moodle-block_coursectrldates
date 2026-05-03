@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version definition for block_coursectrl.
+ * Plugin version definition for block_coursectrldates.
  *
- * @package    block_coursectrl
- * @copyright  2026 Course Control Hub Contributors
+ * @package    block_coursectrldates
+ * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,8 +28,8 @@ $plugin->component    = 'block_coursectrldates';
 $plugin->version      = 2026050300;
 $plugin->requires     = 2024042200; // Moodle 4.5.
 $plugin->dependencies = [
-    'local_coursectrl' => 2026050305,
+    'local_coursectrl' => ANY_VERSION,
 ];
 $plugin->supported = [405, 502]; // Moodle 4.5 through 5.2.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release  = '0.1.0';
+$plugin->maturity  = MATURITY_ALPHA;
+$plugin->release   = '0.1.0';

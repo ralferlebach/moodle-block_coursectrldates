@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_coursectrldates/splash
+
+    Splash screen displayed when a new-start event is detected.
+
+    Context variables required for this template:
+    * title        {string} Splash heading text.
+    * message      {string} Body message encouraging the teacher to check dates.
+    * timelineurl  {string} URL to local_coursectrl timeline.php.
+    * timelinelabel {string} Label for the timeline button.
+    * dismissurl   {string} URL / AJAX endpoint to dismiss the splash.
+    * dismisslabel {string} Label for the dismiss button.
+
+    Example context (json):
+    {
+        "title": "Check course dates",
+        "message": "This course has been newly created or reset.",
+        "timelineurl": "/local/coursectrl/timeline.php?courseid=2",
+        "timelinelabel": "Open timeline",
+        "dismissurl": "/blocks/coursectrldates/action.php?action=dismiss_splash&instanceid=3",
+        "dismisslabel": "Dismiss"
+    }
+}}
+<div class="block-coursectrldates-splash alert alert-info" data-region="coursectrldates-splash">
+    <strong>{{title}}</strong>
+    <p class="mt-1 mb-2">{{message}}</p>
+    <a href="{{timelineurl}}" class="btn btn-sm btn-primary me-1">
+        {{timelinelabel}}
+    </a>
+    <a href="{{dismissurl}}" class="btn btn-sm btn-outline-secondary"
+       data-action="dismiss-splash">
+        {{dismisslabel}}
+    </a>
+</div>

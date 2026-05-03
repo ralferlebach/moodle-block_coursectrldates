@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_coursectrldates/block
+
+    Outer wrapper for the course-dates block content.
+
+    Context variables required for this template:
+    * showsplash   {bool}   Whether to display the splash view instead of normal content.
+    * showcalendar {bool}   Whether to render the calendar section.
+    * calendar     {object} Context for the calendar sub-template.
+    * eventlist    {object} Context for the event_list sub-template.
+    * splash       {object} Context for the splash sub-template.
+
+    Example context (json):
+    {
+        "showsplash": false,
+        "showcalendar": true,
+        "calendar": { "weeks": 4, "hascalendar": false },
+        "eventlist": { "hasevents": false, "events": [], "istruncated": false,
+                       "shown": 0, "total": 0, "timelineurl": "#" },
+        "splash": { "title": "", "message": "", "timelineurl": "#",
+                    "timelinelabel": "", "dismissurl": "#", "dismisslabel": "" }
+    }
+}}
+<div class="block-coursectrldates" data-region="block-coursectrldates">
+    {{#showsplash}}
+        {{> block_coursectrldates/splash }}
+    {{/showsplash}}
+    {{^showsplash}}
+        {{#showcalendar}}
+            {{> block_coursectrldates/calendar }}
+        {{/showcalendar}}
+        {{> block_coursectrldates/event_list }}
+    {{/showsplash}}
+</div>

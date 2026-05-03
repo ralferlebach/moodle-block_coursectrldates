@@ -1,5 +1,5 @@
 MOODLE_ROOT := /var/www/html/moodle45_aliseadele
-PLUGIN_PATH  := local/coursectrl
+PLUGIN_PATH  := blocks/coursectrldates
 PHP          := php
 
 .PHONY: all fix check fix-phpdoc lint-php lint-js lint-phpdoc lint-mustache
@@ -11,7 +11,7 @@ all: clear fix-phpdoc lint-php fix-lint-php lint-js lint-phpdoc lint-mustache
 fix: clear fix-phpdoc fix-lint-php
 	@echo ""
 	@echo "=== All fixes complete. ==="
-	
+
 check: clear lint-php lint-js lint-phpdoc lint-mustache
 	@echo ""
 	@echo "=== All checks complete. Review output above for errors. ==="

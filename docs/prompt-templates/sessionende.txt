@@ -1,24 +1,24 @@
 ## SESSION-ABSCHLUSS: Kontext-Dokument generieren
 
-Wir beenden jetzt diese Arbeitssitzung am Projekt **Course Control Hub** 
-(local_coursectrl / block_coursectrl).
+Wir beenden jetzt diese Arbeitssitzung am Projekt **Course Control Hub – Dates Block**
+(block_coursectrldates).
 
-Erstelle ein kompaktes Kontext-Dokument für die nächste Sitzung. 
+Erstelle ein kompaktes Kontext-Dokument für die nächste Sitzung.
 Halte dich an exakt diese Struktur:
 
 ---
 
-# CCH Kontext-Dokument
+# block_coursectrldates Kontext-Dokument
 Erstellt: [Datum + Uhrzeit]
 Sitzung Nr.: [fortlaufend]
 
 ## 1. Aktueller Projektstand
-- Aktuelle Phase (0–10) und ihr Ziel
+- Aktuelle Implementierungsphase und ihr Ziel
 - Abgeschlossene Phasen (stichpunktartig)
 - Was in dieser Sitzung konkret erledigt wurde
 
 ## 2. Finalisierte Artefakte
-Liste jeder Datei/Klasse, die in dieser oder einer früheren Sitzung 
+Liste jeder Datei/Klasse, die in dieser oder einer früheren Sitzung
 als **fertig** markiert wurde:
 - Pfad relativ zum Plugin-Root
 - Ein-Satz-Beschreibung ihres Zwecks
@@ -31,31 +31,33 @@ Was als nächstes zu tun ist, in Reihenfolge:
 
 ## 4. Architekturentscheidungen (verbindlich)
 Alle getroffenen Entscheidungen, die spätere Sitzungen binden:
-- Interface-Signaturen, die nicht mehr geändert werden
-- DB-Schema-Entscheidungen
+- Schnittstellen zu local_coursectrl (Service-Methoden, Parameter, Rückgabeformat)
+- Mustache-Template-Variablen-Verträge
 - Namenskonventionen
-- Abweichungen vom ursprünglichen Pflichtenheft (mit Begründung)
+- Abweichungen vom Blueprint (mit Begründung)
 
 ## 5. Kritische Abhängigkeiten
-Welche Klassen/Interfaces hängen voneinander ab und in welcher 
+Welche Klassen/Interfaces hängen voneinander ab und in welcher
 Reihenfolge müssen sie fertiggestellt werden?
+Insbesondere: Welche local_coursectrl-Services müssen vor der
+nächsten Phase abgestimmt/implementiert sein?
 
 ## 6. Bekannte Probleme und Risiken
-Offene technische Fragen, ungelöste Moodle-spezifische Probleme, 
-Stellen mit erhöhtem Risiko.
+Offene technische Fragen, ungelöste Moodle-spezifische Probleme,
+Stellen mit erhöhtem Risiko (z. B. noch offene Punkte aus Blueprint-Abschnitt 6).
 
 ## 7. GitHub-Repositorium
-URL: [vollständige URL]
-Hauptbranch: [main/develop/…]
+URL: https://github.com/ralferlebach/moodle-block_coursectrldates
+Hauptbranch: development
 Relevante Branches dieser Sitzung: [falls abweichend]
 Letzte bekannte Commit-Message dieser Sitzung: [falls bekannt]
 
 ## 8. Für die nächste Sitzung mitzugebende Dateien
-Welche konkreten Dateien aus dem Repo soll Claude zu Beginn der 
+Welche konkreten Dateien aus dem Repo soll Claude zu Beginn der
 nächsten Sitzung lesen, um arbeitsfähig zu sein?
 - [Pfad] – warum relevant
 
 ---
 
-Fülle alle Abschnitte aus. Wo du keine Information hast, schreibe 
+Fülle alle Abschnitte aus. Wo du keine Information hast, schreibe
 explizit „unbekannt" oder „nicht besprochen". Erfinde nichts.

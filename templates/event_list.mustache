@@ -1,0 +1,68 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_coursectrldates/event_list
+
+    Chronological list of upcoming course events with shift buttons.
+
+    Context variables required for this template:
+    * hasevents   {bool}   Whether the events array contains items.
+    * events      {array}  List of event item objects (see event_item.mustache).
+    * istruncated {bool}   Whether not all available events are shown.
+    * shown       {int}    Number of events currently displayed.
+    * total       {int}    Total number of available events.
+    * timelineurl {string} URL to local_coursectrl timeline.php.
+
+    Example context (json):
+    {
+        "hasevents": true,
+        "events": [
+            {
+                "dateformatted": "Mon, 4 Nov 2026, 10:00",
+                "cmname": "Assignment 1",
+                "eventlabel": "opens",
+                "shifturl": "/local/coursectrl/manage.php?courseid=2&cmid=5&action=shift_dates"
+            }
+        ],
+        "istruncated": false,
+        "shown": 1,
+        "total": 1,
+        "timelineurl": "/local/coursectrl/timeline.php?courseid=2"
+    }
+}}
+<div class="block-coursectrldates-eventlist" data-region="coursectrldates-eventlist">
+    {{#hasevents}}
+        <ul class="list-unstyled mb-2">
+            {{#events}}
+                {{> block_coursectrldates/event_item }}
+            {{/events}}
+        </ul>
+        {{#istruncated}}
+            <p class="small text-muted">
+                {{shown}} / {{total}}
+            </p>
+            <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block mb-1">
+                {{#str}} view_all_in_timeline, block_coursectrldates {{/str}}
+            </a>
+        {{/istruncated}}
+        {{^istruncated}}
+            <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block mt-1">
+                {{#str}} open_timeline, block_coursectrldates {{/str}}
+            </a>
+        {{/istruncated}}
+    {{/hasevents}}
+</div>
