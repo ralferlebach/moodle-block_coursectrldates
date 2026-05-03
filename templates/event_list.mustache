@@ -17,65 +17,159 @@
 {{!
     @template block_coursectrldates/event_list
 
-    Chronological list of upcoming course events with shift buttons.
+    Compact timeline-style date list for the course-dates block.
+
+    Mirrors the day → slot → entry hierarchy of local_coursectrl/timeline
+    so that the visual layout is consistent between the block and the
+    full timeline page. All entries are inlined; the event_item partial
+    is not used.
 
     Context variables required for this template:
-    * hasevents          {bool}   Whether the events array contains items.
-    * events             {array}  List of event item objects (see event_item.mustache).
-    * istruncated        {bool}   Whether not all available events are shown.
-    * shown              {int}    Number of events currently displayed.
-    * total              {int}    Total number of available events.
-    * timelineurl        {string} URL to local_coursectrl timeline.php.
-    * opentimelinelabel  {string} Label for the open-timeline button.
-    * viewalllabel       {string} Label for the view-all button shown when truncated.
-    * noeventsmessage    {string} Message shown when no events are available.
+    * hasdays            {bool}
+    * days               {array}   Day objects.
+    * istruncated        {bool}
+    * shown              {int}
+    * total              {int}
+    * timelineurl        {string}
+    * opentimelinelabel  {string}
+    * viewalllabel       {string}
+    * noeventsmessage    {string}
+    * shiftslotlabel     {string}
+    * shiftfollowinglabel {string}
+    * shiftentrylabel    {string}
+
+    Day object:
+    * daykey        {string}
+    * dayformatted  {string}
+    * ispast        {bool}
+    * slots         {array}
+
+    Slot object:
+    * timeformatted      {string}
+    * timekey            {int}
+    * ispast             {bool}
+    * shiftsloturl       {string}
+    * shiftfollowingurl  {string}
+    * entries            {array}
+
+    Entry object:
+    * cmid          {int}
+    * name          {string}
+    * modname       {string}
+    * field         {string}
+    * activityurl   {string}
+    * shiftentryurl {string}
 
     Example context (json):
     {
-        "hasevents": true,
-        "events": [
-            {
-                "dateformatted": "Mon, 4 Nov 2026, 10:00",
-                "cmname": "Assignment 1",
-                "eventlabel": "Due date",
-                "shifturl": "/local/coursectrl/manage.php?courseid=2&cmid=5&action=shift_dates",
-                "shiftlabel": "Shift dates"
-            }
-        ],
+        "hasdays": true,
+        "days": [{
+            "daykey": "2026-04-12",
+            "dayformatted": "Sunday, 12 April 2026",
+            "ispast": false,
+            "slots": [{
+                "timeformatted": "00:00",
+                "timekey": 1744416000,
+                "ispast": false,
+                "shiftsloturl": "/local/coursectrl/timeline.php?courseid=2",
+                "shiftfollowingurl": "/local/coursectrl/timeline.php?courseid=2",
+                "entries": [{
+                    "cmid": 5,
+                    "name": "Workshop",
+                    "modname": "workshop",
+                    "field": "Submission start",
+                    "activityurl": "/mod/workshop/view.php?id=5",
+                    "shiftentryurl": "/local/coursectrl/timeline.php?courseid=2"
+                }]
+            }]
+        }],
         "istruncated": false,
         "shown": 1,
         "total": 1,
         "timelineurl": "/local/coursectrl/timeline.php?courseid=2",
         "opentimelinelabel": "Open timeline",
         "viewalllabel": "View all in timeline",
-        "noeventsmessage": "No course dates found in the next 4 weeks."
+        "noeventsmessage": "No course dates found.",
+        "shiftslotlabel": "Shift this time slot",
+        "shiftfollowinglabel": "Shift following dates",
+        "shiftentrylabel": "Shift this date"
     }
 }}
 <div class="block-coursectrldates-eventlist" data-region="coursectrldates-eventlist">
-    {{#hasevents}}
-        <ul class="list-unstyled mb-2">
-            {{#events}}
-                {{> block_coursectrldates/event_item }}
-            {{/events}}
-        </ul>
-        {{#istruncated}}
-            <p class="small text-muted mb-1">
-                {{shown}} / {{total}}
-            </p>
-            <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block mb-1">
-                {{viewalllabel}}
-            </a>
-        {{/istruncated}}
-        {{^istruncated}}
-            <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block mt-1">
-                {{opentimelinelabel}}
-            </a>
-        {{/istruncated}}
-    {{/hasevents}}
-    {{^hasevents}}
-        <p class="text-muted small mb-2">{{noeventsmessage}}</p>
-        <a href="{{timelineurl}}" class="btn btn-sm btn-outline-secondary d-block">
-            {{opentimelinelabel}}
-        </a>
-    {{/hasevents}}
+
+    {{#hasdays}}
+    {{#days}}
+    <div class="card mb-2{{#ispast}} opacity-75{{/ispast}}" data-daykey="{{daykey}}">
+        <div class="card-header py-1 d-flex align-items-center gap-2"
+             id="ccd-day-{{daykey}}">
+            <span class="{{#ispast}}text-muted{{/ispast}}">{{dayformatted}}</span>
+        </div>
+        {{#slots}}
+        <div class="card-body py-1 px-2">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="small text-muted">{{timeformatted}}</span>
+                <span class="d-flex gap-1" style="min-width:5rem">
+                    <a href="{{shiftsloturl}}"
+                       class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                       title="{{shiftslotlabel}}">
+                        <i class="fa fa-calendar-day fa-sm"></i>
+                    </a>
+                    <a href="{{shiftfollowingurl}}"
+                       class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                       title="{{shiftfollowinglabel}}">
+                        <i class="fa fa-calendar-days fa-sm"></i>
+                    </a>
+                </span>
+            </div>
+            <ul class="list-group list-group-flush">
+                {{#entries}}
+                <li class="list-group-item d-flex align-items-center
+                            justify-content-between py-1 px-0">
+                    <span class="text-truncate me-2">
+                        {{#pix}}monologo, mod_{{modname}}, {{modname}}{{/pix}}
+                        <a href="{{activityurl}}" target="_blank"
+                           rel="noopener noreferrer">{{name}}</a>
+                        <span class="badge bg-light border text-muted ms-1">
+                            {{field}}
+                        </span>
+                    </span>
+                    <span class="d-flex gap-1 flex-shrink-0"
+                          style="min-width:2.5rem">
+                        <a href="{{shiftentryurl}}"
+                           class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                           title="{{shiftentrylabel}}">
+                            <i class="fa fa-calendar-day fa-sm"></i>
+                        </a>
+                    </span>
+                </li>
+                {{/entries}}
+            </ul>
+        </div>
+        {{/slots}}
+    </div>
+    {{/days}}
+
+    {{#istruncated}}
+    <p class="small text-muted mb-1">{{shown}} / {{total}}</p>
+    <a href="{{timelineurl}}"
+       class="btn btn-sm btn-outline-secondary d-block mb-2">
+        {{viewalllabel}}
+    </a>
+    {{/istruncated}}
+    {{^istruncated}}
+    <a href="{{timelineurl}}"
+       class="btn btn-sm btn-outline-secondary d-block mt-1 mb-1">
+        {{opentimelinelabel}}
+    </a>
+    {{/istruncated}}
+    {{/hasdays}}
+
+    {{^hasdays}}
+    <p class="text-muted small mb-2">{{noeventsmessage}}</p>
+    <a href="{{timelineurl}}"
+       class="btn btn-sm btn-outline-secondary d-block">
+        {{opentimelinelabel}}
+    </a>
+    {{/hasdays}}
+
 </div>
