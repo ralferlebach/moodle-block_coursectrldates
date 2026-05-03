@@ -1,0 +1,27 @@
+# Normalise line endings on all text files.
+* text=auto
+
+# ── Development documentation (not deployed to production) ────────────────────
+# Session logs, coding-standards prompts, and specification documents are
+# development artefacts only. They are excluded from `git archive` exports
+# (e.g. Moodle update packages) and from automated deployment pipelines that
+# use `git archive` or `export-ignore` flags.
+/docs/prompt-templates                 export-ignore
+/docs/prompt-templates/**              export-ignore
+/docs/sessions                         export-ignore
+/docs/sessions/**                      export-ignore
+/docs/materials                        export-ignore
+/docs/materials/**                     export-ignore
+/tools                                 export-ignore
+/tools/**                              export-ignore
+
+# ── User documentation (deployed) ────────────────────────────────────────────
+# docs/user-guide.md is intentionally NOT listed here — it is included in
+# exports so that administrators and teachers can read it offline.
+
+# ── Tooling and CI (not deployed) ────────────────────────────────────────────
+/.github                               export-ignore
+/.github/**                            export-ignore
+/vendor                                export-ignore
+/vendor/**                             export-ignore
+/makefile                              export-ignore
