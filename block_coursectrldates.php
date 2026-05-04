@@ -29,9 +29,9 @@
  * dates. A single call to local_coursectrl's inventory and date-collector
  * services feeds both sections so the DB is hit only once per page load.
  *
- * The course ID is resolved via $PAGE->context so the block works both on
- * the course view page and on local_coursectrl management pages (timeline,
- * manage, shift, etc.) that set $PAGE->context = context_course.
+ * The course ID is resolved via $this->page->context so the block works
+ * both on the course view page and on local_coursectrl management pages
+ * (timeline, manage, shift, etc.) that set $PAGE->context = context_course.
  */
 class block_coursectrldates extends block_base {
     /**
@@ -100,15 +100,15 @@ class block_coursectrldates extends block_base {
     /**
      * Produce the block content.
      *
-     * The course ID is derived from $PAGE->context so the block works
-     * correctly on both course-view pages and CCH pages.
-     *
-     * The event list shows only upcoming events (timestamp >= now).
+     * The course ID is derived from $this->page->context so the block
+     * works correctly on both course-view pages and CCH pages (which call
+     * $PAGE->set_context with the course context and $PAGE->set_pagetype
+     * to course-view-* so the block instance is matched).
      *
      * @return stdClass|null
      */
     public function get_content(): ?stdClass {
-        global $OUTPUT, $PAGE, $USER;
+        global $OUTPUT, $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -117,9 +117,8 @@ class block_coursectrldates extends block_base {
         $this->content = new stdClass();
         $this->content->footer = '';
 
-        // Resolve course context from the current page. $PAGE->context is set
-        // to context_course by both course-view pages and CCH pages.
-        $coursecontext = $PAGE->context;
+        // Resolve course context via $this->page (Moodle-approved in blocks).
+        $coursecontext = $this->page->context;
         if ($coursecontext->contextlevel !== CONTEXT_COURSE) {
             $coursecontext = $coursecontext->get_course_context(false);
         }
@@ -156,8 +155,6 @@ class block_coursectrldates extends block_base {
         }
 
         // Event list: upcoming events only (timestamp >= now).
-        // Use foreach instead of array_filter+closure to avoid edge cases
-        // with static closures inside non-static methods.
         if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
             $timeto = $now + (52 * WEEKSECS);
             $noeventsmessage = get_string('no_events_count', 'block_coursectrldates');
@@ -209,8 +206,10 @@ class block_coursectrldates extends block_base {
                 $this->instance->id,
                 $USER->id
             );
-            if (!$splashstate->is_dismissed()
-                && $this->compute_show_help($courseid, $config, $snapshot->cms)) {
+            if (
+                !$splashstate->is_dismissed()
+                && $this->compute_show_help($courseid, $config, $snapshot->cms)
+            ) {
                 $showhelp = true;
 
                 $dismissurl = new \moodle_url('/blocks/coursectrldates/action.php');

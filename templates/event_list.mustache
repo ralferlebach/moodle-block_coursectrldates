@@ -19,14 +19,9 @@
 
     Compact timeline-style date list for the course-dates block.
 
-    Mirrors the day → slot → entry hierarchy of local_coursectrl/timeline
-    so that the visual layout is consistent between the block and the
-    full timeline page. All entries are inlined; the event_item partial
-    is not used.
-
     Context variables required for this template:
     * hasdays            {bool}
-    * days               {array}   Day objects.
+    * days               {array}
     * istruncated        {bool}
     * shown              {int}
     * total              {int}
@@ -38,47 +33,25 @@
     * shiftfollowinglabel {string}
     * shiftentrylabel    {string}
 
-    Day object:
-    * daykey        {string}
-    * dayformatted  {string}
-    * ispast        {bool}
-    * slots         {array}
-
-    Slot object:
-    * timeformatted      {string}
-    * timekey            {int}
-    * ispast             {bool}
-    * shiftsloturl       {string}
-    * shiftfollowingurl  {string}
-    * entries            {array}
-
-    Entry object:
-    * cmid          {int}
-    * name          {string}
-    * modname       {string}
-    * field         {string}
-    * activityurl   {string}
-    * shiftentryurl {string}
-
     Example context (json):
     {
         "hasdays": true,
         "days": [{
-            "daykey": "2026-04-12",
-            "dayformatted": "Sunday, 12 April 2026",
+            "daykey": "2026-05-09",
+            "dayformatted": "Saturday, 9 May 2026",
             "ispast": false,
             "slots": [{
-                "timeformatted": "00:00",
-                "timekey": 1744416000,
+                "timeformatted": "16:11",
+                "timekey": 1746803460,
                 "ispast": false,
                 "shiftsloturl": "/local/coursectrl/timeline.php?courseid=2",
                 "shiftfollowingurl": "/local/coursectrl/timeline.php?courseid=2",
                 "entries": [{
                     "cmid": 5,
-                    "name": "Workshop",
-                    "modname": "workshop",
-                    "field": "Submission start",
-                    "activityurl": "/mod/workshop/view.php?id=5",
+                    "name": "Glossar",
+                    "modname": "glossary",
+                    "field": "Erinnerung in der Zeitleiste setzen",
+                    "activityurl": "/mod/glossary/view.php?id=5",
                     "shiftentryurl": "/local/coursectrl/timeline.php?courseid=2"
                 }]
             }]
@@ -108,14 +81,16 @@
         <div class="card-body py-1 px-2">
             <div class="d-flex align-items-center justify-content-between mb-1">
                 <span class="small text-muted">{{timeformatted}}</span>
-                <span class="d-flex gap-1" style="min-width:5rem">
+                <span class="d-flex gap-1">
                     <a href="{{shiftsloturl}}"
                        class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                       style="min-width:2.5rem"
                        title="{{shiftslotlabel}}">
                         <i class="fa fa-calendar-day fa-sm"></i>
                     </a>
                     <a href="{{shiftfollowingurl}}"
                        class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                       style="min-width:2.5rem"
                        title="{{shiftfollowinglabel}}">
                         <i class="fa fa-calendar-days fa-sm"></i>
                     </a>
@@ -133,10 +108,10 @@
                             {{field}}
                         </span>
                     </span>
-                    <span class="d-flex gap-1 flex-shrink-0"
-                          style="min-width:2.5rem">
+                    <span class="flex-shrink-0">
                         <a href="{{shiftentryurl}}"
                            class="btn btn-sm btn-outline-secondary p-1 lh-1"
+                           style="min-width:2.5rem"
                            title="{{shiftentrylabel}}">
                             <i class="fa fa-calendar-day fa-sm"></i>
                         </a>

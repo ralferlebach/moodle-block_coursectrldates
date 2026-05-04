@@ -32,30 +32,31 @@ use templatable;
 /**
  * Event list renderable.
  *
- * Transports a sorted list of upcoming activity-date events to the
- * event_list Mustache template. Builds action URLs for each event's
- * shift-dates shortcut and for the timeline link.
+ * Groups a flat sorted list of upcoming events into the day → slot → entry
+ * hierarchy that event_list.mustache expects, matching the structure used by
+ * local_coursectrl/timeline. Each slot and entry carries the correct
+ * autoopen URLs so that the shift dialog opens immediately on timeline.php.
  */
 class event_list implements renderable, templatable {
-    /** @var array List of normalised event arrays from event_provider. */
+    /** @var array Sorted upcoming event arrays. */
     private array $events;
 
-    /** @var int Total number of events available (may exceed displayed set). */
+    /** @var int Total events available before any truncation. */
     private int $totalcount;
 
-    /** @var int Course ID used for building shift/timeline URLs. */
+    /** @var int Course ID for building URLs. */
     private int $courseid;
 
-    /** @var string Message shown when no events are available. */
+    /** @var string Message shown when there are no events. */
     private string $noeventsmessage;
 
     /**
      * Constructor.
      *
-     * @param array  $events          Normalised event arrays to display.
-     * @param int    $totalcount      Total available events (for truncation notice).
-     * @param int    $courseid        Course ID for building action URLs.
-     * @param string $noeventsmessage Localised message for the empty state.
+     * @param array  $events          Sorted event arrays.
+     * @param int    $totalcount      Total available events (pre-truncation).
+     * @param int    $courseid        Course ID for URL building.
+     * @param string $noeventsmessage Localised empty-state message.
      */
     public function __construct(
         array $events,
@@ -70,52 +71,132 @@ class event_list implements renderable, templatable {
     }
 
     /**
-     * Export data for the Mustache template.
+     * Build a timeline.php URL that pre-opens the shift dialog.
+     *
+     * @param string $autoopen 'slot' | 'following' | 'entry'
+     * @param int    $ts       Unix timestamp (slot / following).
+     * @param int    $cmid     CM id (entry).
+     * @param string $field    Field name (entry).
+     * @return string
+     */
+    private function shift_url(
+        string $autoopen,
+        int $ts = 0,
+        int $cmid = 0,
+        string $field = ''
+    ): string {
+        $url = new moodle_url('/local/coursectrl/timeline.php');
+        $url->param('courseid', $this->courseid);
+        $url->param('autoopen', $autoopen);
+        if ($ts > 0) {
+            $url->param('shift_ts', $ts);
+        }
+        if ($cmid > 0) {
+            $url->param('shift_cmid', $cmid);
+        }
+        if ($field !== '') {
+            $url->param('shift_field', $field);
+        }
+        return $url->out(false);
+    }
+
+    /**
+     * Export data for event_list.mustache.
+     *
+     * Groups events into the day → slot → entry structure the template
+     * requires. All link targets carry the autoopen parameters so that
+     * the shift dialog opens immediately on timeline.php without extra clicks.
      *
      * @param renderer_base $output Renderer instance.
      * @return array Template context.
      */
     public function export_for_template(renderer_base $output): array {
-        $shown = count($this->events);
-        $istruncated = $shown < $this->totalcount;
+        $now = time();
+        $dayformat  = get_string('strftimedaydate', 'core_langconfig');
+        $timeformat = get_string('strftimetime24', 'core_langconfig');
 
         $timelineurl = new moodle_url('/local/coursectrl/timeline.php');
         $timelineurl->param('courseid', $this->courseid);
+        $timelineurlstr = $timelineurl->out(false);
 
-        $opentimelinelabel = get_string('open_timeline', 'block_coursectrldates');
-        $viewalllabel = get_string('view_all_in_timeline', 'block_coursectrldates');
-        $shiftlabel = get_string('shift_dates', 'block_coursectrldates');
-
-        $items = [];
+        // Group events into days, then slots within each day.
+        $daygroups = [];
         foreach ($this->events as $event) {
-            $shifturl = new moodle_url('/local/coursectrl/manage.php');
-            $shifturl->param('courseid', $this->courseid);
-            $shifturl->param('cmid', $event['cmid'] ?? 0);
-            $shifturl->param('action', 'shift_dates');
+            $ts      = (int) $event['timestamp'];
+            $daykey  = date('Y-m-d', $ts);
+            $slotkey = $ts;
 
-            $items[] = [
-                'timestamp'     => $event['timestamp'] ?? 0,
-                'dateformatted' => userdate(
-                    $event['timestamp'] ?? 0,
-                    get_string('strftimedaydatetime', 'core_langconfig')
+            if (!isset($daygroups[$daykey])) {
+                $daygroups[$daykey] = [
+                    'daykey'       => $daykey,
+                    'dayformatted' => userdate($ts, $dayformat),
+                    'ispast'       => false,
+                    'slots'        => [],
+                ];
+            }
+
+            if (!isset($daygroups[$daykey]['slots'][$slotkey])) {
+                $daygroups[$daykey]['slots'][$slotkey] = [
+                    'timeformatted'     => userdate($ts, $timeformat),
+                    'timekey'           => $ts,
+                    'ispast'            => $ts < $now,
+                    // Slot button: shifts all entries at exactly this timestamp.
+                    'shiftsloturl'      => $this->shift_url('slot', $ts),
+                    // Following button: shifts all entries at this timestamp and later.
+                    'shiftfollowingurl' => $this->shift_url('following', $ts),
+                    'entries'           => [],
+                ];
+            }
+
+            $modname = (string) ($event['modname'] ?? '');
+            if ($modname !== '') {
+                $aurl = new moodle_url('/mod/' . $modname . '/view.php');
+                $aurl->param('id', (int) ($event['cmid'] ?? 0));
+                $activityurl = $aurl->out(false);
+            } else {
+                $activityurl = $timelineurlstr;
+            }
+
+            $daygroups[$daykey]['slots'][$slotkey]['entries'][] = [
+                'cmid'          => (int) ($event['cmid'] ?? 0),
+                'name'          => (string) ($event['cmname'] ?? ''),
+                'modname'       => $modname,
+                'field'         => (string) ($event['eventlabel'] ?? ''),
+                // Entry button: shifts only this CM + this specific field.
+                'activityurl'   => $activityurl,
+                'shiftentryurl' => $this->shift_url(
+                    'entry',
+                    0,
+                    (int) ($event['cmid'] ?? 0),
+                    (string) ($event['eventtype'] ?? '')
                 ),
-                'cmname'        => $event['cmname'] ?? '',
-                'eventlabel'    => $event['eventlabel'] ?? '',
-                'shifturl'      => $shifturl->out(false),
-                'shiftlabel'    => $shiftlabel,
             ];
         }
 
+        // Flatten slots arrays to indexed lists.
+        $days = [];
+        foreach ($daygroups as $day) {
+            ksort($day['slots']);
+            $day['slots'] = array_values($day['slots']);
+            $days[] = $day;
+        }
+
+        $shown      = count($this->events);
+        $istruncated = $shown < $this->totalcount;
+
         return [
-            'hasevents'         => !empty($items),
-            'events'            => $items,
-            'istruncated'       => $istruncated,
-            'shown'             => $shown,
-            'total'             => $this->totalcount,
-            'timelineurl'       => $timelineurl->out(false),
-            'opentimelinelabel' => $opentimelinelabel,
-            'viewalllabel'      => $viewalllabel,
-            'noeventsmessage'   => $this->noeventsmessage,
+            'hasdays'             => !empty($days),
+            'days'                => $days,
+            'istruncated'         => $istruncated,
+            'shown'               => $shown,
+            'total'               => $this->totalcount,
+            'timelineurl'         => $timelineurlstr,
+            'opentimelinelabel'   => get_string('open_timeline', 'block_coursectrldates'),
+            'viewalllabel'        => get_string('view_all_in_timeline', 'block_coursectrldates'),
+            'noeventsmessage'     => $this->noeventsmessage,
+            'shiftslotlabel'      => get_string('shift_slot', 'block_coursectrldates'),
+            'shiftfollowinglabel' => get_string('shift_following', 'block_coursectrldates'),
+            'shiftentrylabel'     => get_string('shift_entry', 'block_coursectrldates'),
         ];
     }
 }
