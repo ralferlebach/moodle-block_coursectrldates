@@ -28,24 +28,35 @@
 require_once(__DIR__ . '/../../config.php');
 
 $instanceid = required_param('instanceid', PARAM_INT);
-$action = required_param('action', PARAM_ALPHA);
-$courseid = required_param('courseid', PARAM_INT);
+$action     = required_param('action', PARAM_ALPHANUMEXT);
+$courseid   = required_param('courseid', PARAM_INT);
 
 require_sesskey();
 
-$course = get_course($courseid);
-$context = context_block::instance($instanceid);
+// Verify that the block instance actually belongs to the given course.
+$blockcontext = context_block::instance($instanceid, MUST_EXIST);
+$coursecontext = $blockcontext->get_course_context(false);
+if (!$coursecontext || (int) $coursecontext->instanceid !== $courseid) {
+    throw new moodle_exception('invalidcourseid');
+}
 
+$course = get_course($courseid);
 require_login($course, false, null, false, true);
-require_capability('block/coursectrldates:view', $context);
+require_capability('block/coursectrldates:view', $blockcontext);
 
 $isajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
     && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-if ($action === 'dismiss_help' || $action === 'dismiss_splash') {
-    // Accept both names for backward compatibility.
-    $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
-    $state->dismiss();
+switch ($action) {
+    case 'dismiss_help':
+    case 'dismiss_splash':
+        // Accept both names for backward compatibility.
+        $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
+        $state->dismiss();
+        break;
+
+    default:
+        throw new moodle_exception('invalidaction', 'error');
 }
 
 if ($isajax) {

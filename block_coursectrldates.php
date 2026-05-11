@@ -208,7 +208,8 @@ class block_coursectrldates extends block_base {
             );
             if (
                 !$splashstate->is_dismissed()
-                && $this->compute_show_help($courseid, $config, $snapshot->cms)
+                && (new \block_coursectrldates\local\setup_help_detector())
+                    ->should_show($courseid, $config, $snapshot->cms)
             ) {
                 $showhelp = true;
 
@@ -245,69 +246,6 @@ class block_coursectrldates extends block_base {
         );
 
         return $this->content;
-    }
-
-    /**
-     * Evaluate whether any setup-help trigger fires for this course.
-     *
-     * @param int                                           $courseid Course ID.
-     * @param \block_coursectrldates\local\config_reader   $config   Block config.
-     * @param \local_coursectrl\local\entity\cm_item[]     $cms      Course modules.
-     * @return bool
-     */
-    private function compute_show_help(
-        int $courseid,
-        \block_coursectrldates\local\config_reader $config,
-        array $cms
-    ): bool {
-        global $DB;
-
-        $winstart = time() - ($config->help_window_weeks() * WEEKSECS);
-
-        if ($config->help_trigger_new()) {
-            $timecreated = (int) $DB->get_field('course', 'timecreated', ['id' => $courseid]);
-            if ($timecreated >= $winstart) {
-                return true;
-            }
-        }
-
-        if ($config->help_trigger_reset()) {
-            $logtable = 'logstore_standard_log';
-            if ($DB->get_manager()->table_exists($logtable)) {
-                $count = $DB->count_records_select(
-                    $logtable,
-                    "courseid = :cid AND component = :comp
-                     AND action = :act AND target = :tgt
-                     AND timecreated >= :ts",
-                    [
-                        'cid'  => $courseid,
-                        'comp' => 'core',
-                        'act'  => 'reset',
-                        'tgt'  => 'course',
-                        'ts'   => $winstart,
-                    ]
-                );
-                if ($count > 0) {
-                    return true;
-                }
-            }
-        }
-
-        if ($config->help_trigger_timedeps() && !empty($cms)) {
-            $cmids = array_keys($cms);
-            [$insql, $inparams] = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
-            $inparams['winstart'] = $winstart;
-            $count = $DB->count_records_select(
-                'course_modules',
-                "id {$insql} AND added >= :winstart",
-                $inparams
-            );
-            if ($count > 0) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

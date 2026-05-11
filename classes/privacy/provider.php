@@ -24,22 +24,69 @@
 
 namespace block_coursectrldates\privacy;
 
-use core_privacy\local\metadata\null_provider;
+use block_coursectrldates\local\splash_state;
+use core_privacy\local\metadata\collection;
+use core_privacy\local\request\user_preference_provider;
+use core_privacy\local\request\writer;
 
 /**
  * Privacy provider for block_coursectrldates.
  *
- * The block stores no personal data of its own. UI-state preferences
- * (splash dismissed flag) are stored through Moodle's core user
- * preference API, which handles their export and deletion centrally.
+ * The block stores one type of personal data: a per-user, per-instance
+ * User Preference that records whether the setup-help notification has been
+ * permanently dismissed. All preferences share the prefix defined in
+ * {@see splash_state::PREF_PREFIX}.
  */
-class provider implements null_provider {
+class provider implements
+    \core_privacy\local\metadata\provider,
+    user_preference_provider {
     /**
-     * Return the component string for the null_provider reason.
+     * Describe the personal data stored by this plugin.
      *
-     * @return string
+     * @param collection $collection Metadata collection to populate.
+     * @return collection
      */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_user_preference(
+            splash_state::PREF_PREFIX,
+            'privacy:metadata:preference:splash_dismissed'
+        );
+        return $collection;
+    }
+
+    /**
+     * Export all User Preferences belonging to the given user.
+     *
+     * Each dismissed block instance is exported as a separate preference entry.
+     *
+     * @param int $userid Moodle user ID.
+     * @return void
+     */
+    public static function export_user_preferences(int $userid): void {
+        global $DB;
+
+        $like = $DB->sql_like('name', ':prefix', false, false);
+        $escapedprefix = $DB->sql_like_escape(splash_state::PREF_PREFIX);
+        $params = [
+            'userid' => $userid,
+            'prefix' => $escapedprefix . '%',
+        ];
+        $prefs = $DB->get_records_select(
+            'user_preferences',
+            "userid = :userid AND {$like}",
+            $params
+        );
+
+        foreach ($prefs as $pref) {
+            writer::export_user_preference(
+                'block_coursectrldates',
+                $pref->name,
+                $pref->value,
+                get_string(
+                    'privacy:metadata:preference:splash_dismissed',
+                    'block_coursectrldates'
+                )
+            );
+        }
     }
 }

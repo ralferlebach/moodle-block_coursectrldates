@@ -24,9 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['blockcoursetrldates:addinstance'] = 'Add a Course dates block';
-$string['blockcoursetrldates:myaddinstance'] = 'Add a Course dates block to Dashboard';
-$string['blockcoursetrldates:view'] = 'View course date overview';
 $string['comingsoon'] = 'Course date overview will be available here soon.';
 $string['config_calendar_header'] = 'Calendar';
 $string['config_calendar_weeks'] = 'Number of weeks';
@@ -44,6 +41,9 @@ $string['config_mode_timewindow'] = 'Time window';
 $string['config_reset_help'] = 'Start setup help now';
 $string['config_show_calendar'] = 'Show calendar';
 $string['config_show_help'] = 'Offer setup help';
+$string['coursectrldates:addinstance'] = 'Add a Course dates block';
+$string['coursectrldates:myaddinstance'] = 'Add a Course dates block to Dashboard';
+$string['coursectrldates:view'] = 'View course date overview';
 $string['event_closes'] = 'closes';
 $string['event_opens'] = 'opens';
 $string['help_later'] = 'Later';
@@ -55,6 +55,7 @@ $string['no_events_count'] = 'No upcoming course dates found.';
 $string['open_timeline'] = 'Open timeline';
 $string['pluginname'] = 'Course dates';
 $string['privacy:metadata'] = 'The Course dates block does not store any personal data of its own. The setup-help dismissed state is stored through Moodle\'s core user-preference API.';
+$string['privacy:metadata:preference:splash_dismissed'] = 'Stores whether the setup-help notification was permanently dismissed for a specific block instance.';
 $string['shift_dates'] = 'Shift dates';
 $string['shift_entry'] = 'Shift this date';
 $string['shift_following'] = 'Shift following dates';

@@ -24,9 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['blockcoursetrldates:addinstance'] = 'Block „Kurstermine" hinzufügen';
-$string['blockcoursetrldates:myaddinstance'] = 'Block „Kurstermine" im Dashboard hinzufügen';
-$string['blockcoursetrldates:view'] = 'Kurs-Terminübersicht anzeigen';
 $string['comingsoon'] = 'Die Kurs-Terminübersicht wird hier in Kürze verfügbar sein.';
 $string['config_calendar_header'] = 'Kalender';
 $string['config_calendar_weeks'] = 'Anzahl Wochen';
@@ -44,6 +41,9 @@ $string['config_mode_timewindow'] = 'Zeitfenster';
 $string['config_reset_help'] = 'Einrichtungshilfe jetzt starten';
 $string['config_show_calendar'] = 'Kalender anzeigen';
 $string['config_show_help'] = 'Einrichtungshilfe anbieten';
+$string['coursectrldates:addinstance'] = 'Block „Kurstermine" hinzufügen';
+$string['coursectrldates:myaddinstance'] = 'Block „Kurstermine" im Dashboard hinzufügen';
+$string['coursectrldates:view'] = 'Kurs-Terminübersicht anzeigen';
 $string['event_closes'] = 'schließt';
 $string['event_opens'] = 'öffnet';
 $string['help_later'] = 'Später';
@@ -55,6 +55,7 @@ $string['no_events_count'] = 'Keine bevorstehenden Kurstermine gefunden.';
 $string['open_timeline'] = 'Timeline öffnen';
 $string['pluginname'] = 'Kurstermine';
 $string['privacy:metadata'] = 'Der Block „Kurstermine" speichert keine eigenen personenbezogenen Daten. Der Anzeigestatus der Einrichtungshilfe wird über die zentrale Benutzereinstellungs-API von Moodle verwaltet.';
+$string['privacy:metadata:preference:splash_dismissed'] = 'Speichert, ob die Einrichtungshilfe für eine bestimmte Block-Instanz dauerhaft ausgeblendet wurde.';
 $string['shift_dates'] = 'Termine verschieben';
 $string['shift_entry'] = 'Diesen Termin verschieben';
 $string['shift_following'] = 'Folgende Termine verschieben';

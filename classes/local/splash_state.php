@@ -32,8 +32,13 @@ namespace block_coursectrldates\local;
  * state is stored as a Moodle user preference so that it survives sessions.
  */
 class splash_state {
-    /** @var string Preference key prefix for the dismissed state. */
-    private const PREF_PREFIX = 'block_coursectrldates_splash_dismissed_';
+    /**
+     * @var string Preference key prefix for the dismissed state.
+     *
+     * Declared public so that the Privacy provider can reference it
+     * without duplicating the string literal.
+     */
+    public const PREF_PREFIX = 'block_coursectrldates_splash_dismissed_';
 
     /** @var int Block instance ID. */
     private int $instanceid;
