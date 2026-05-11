@@ -182,6 +182,6 @@ phpunit:
 		echo "      Add to config.php and run: php admin/tool/phpunit/cli/init.php"; \
 	else \
 		cd $(MOODLE_ROOT) && $(PHP) vendor/bin/phpunit \
-			--testsuite local_coursectrl_testsuite \
+			--testsuite block_coursectrldates_testsuite \
 			--testdox 2>&1 | grep -vE '^ ✔ |^$$' || true; \
 	fi

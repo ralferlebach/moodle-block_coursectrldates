@@ -43,17 +43,18 @@ final class config_reader_test extends advanced_testcase {
     public function test_null_config_returns_defaults(): void {
         $reader = new config_reader(null);
 
-        $this->assertFalse($reader->show_calendar());
+        // Booleans that default to true to match edit_form.php defaults.
+        $this->assertTrue($reader->show_calendar());
         $this->assertSame(config_reader::DEFAULT_CALENDAR_WEEKS, $reader->calendar_weeks());
         $this->assertSame(config_reader::MODE_TIMEWINDOW, $reader->list_mode());
         $this->assertSame(config_reader::DEFAULT_LIST_WEEKS, $reader->list_weeks());
         $this->assertSame(config_reader::DEFAULT_LIST_COUNT, $reader->list_count());
-        $this->assertFalse($reader->show_help());
+        $this->assertTrue($reader->show_help());
         $this->assertSame(config_reader::DEFAULT_HELP_WEEKS, $reader->help_window_weeks());
-        $this->assertFalse($reader->help_trigger_new());
-        $this->assertFalse($reader->help_trigger_reset());
-        $this->assertFalse($reader->help_trigger_timedeps());
-        $this->assertFalse($reader->reset_help());
+        $this->assertTrue($reader->help_trigger_new());
+        $this->assertTrue($reader->help_trigger_reset());
+        $this->assertTrue($reader->help_trigger_timedeps());
+        $this->assertFalse($reader->reset_help()); // Reset always defaults to false.
     }
 
     /**
@@ -64,9 +65,9 @@ final class config_reader_test extends advanced_testcase {
     public function test_empty_config_returns_defaults(): void {
         $reader = new config_reader(new \stdClass());
 
-        $this->assertFalse($reader->show_calendar());
+        $this->assertTrue($reader->show_calendar());
         $this->assertSame(config_reader::MODE_TIMEWINDOW, $reader->list_mode());
-        $this->assertFalse($reader->show_help());
+        $this->assertTrue($reader->show_help());
     }
 
     /**
@@ -175,9 +176,10 @@ final class config_reader_test extends advanced_testcase {
         $this->assertTrue($reader->help_trigger_timedeps());
         $this->assertTrue($reader->reset_help());
 
+        // Triggers also default to true for a fresh unconfigured block.
         $reader2 = new config_reader(new \stdClass());
-        $this->assertFalse($reader2->help_trigger_new());
-        $this->assertFalse($reader2->help_trigger_reset());
-        $this->assertFalse($reader2->help_trigger_timedeps());
+        $this->assertTrue($reader2->help_trigger_new());
+        $this->assertTrue($reader2->help_trigger_reset());
+        $this->assertTrue($reader2->help_trigger_timedeps());
     }
 }

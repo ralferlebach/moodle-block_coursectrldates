@@ -79,10 +79,13 @@ final class event_list_test extends advanced_testcase {
      * @return array Template context.
      */
     private function export(array $events, int $total = 0, string $nomessage = ''): array {
-        global $OUTPUT;
-        $count = $total > 0 ? $total : count($events);
-        $list  = new event_list($events, $count, self::CID, $nomessage);
-        return $list->export_for_template($OUTPUT);
+        // PHPUnit bootstraps $OUTPUT as core\output\bootstrap_renderer, which does not
+        // satisfy the renderer_base type hint. Since export_for_template() does not
+        // use the renderer instance, a mock satisfies the contract correctly.
+        $count  = $total > 0 ? $total : count($events);
+        $output = $this->createMock(\renderer_base::class);
+        $list   = new event_list($events, $count, self::CID, $nomessage);
+        return $list->export_for_template($output);
     }
 
     // Empty list tests.

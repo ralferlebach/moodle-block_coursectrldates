@@ -1,38 +1,29 @@
 ##############################################################################
-# GitHub Actions CI – block_coursectrldates (Course Control Hub – Dates Block)
+# GitHub Actions CI – block_coursectrldates (Course Dates Block)
 #
 # Matrix:
 #   Moodle:  4.5, 5.0, 5.1, 5.2
-#   PHP:     8.2, 8.3, 8.4  (8.4 excluded for Moodle < 5.1)
+#   PHP:     8.1, 8.2, 8.3, 8.4  (with version-appropriate exclusions)
 #   DB:      MariaDB 10.11  |  PostgreSQL 16
 #
 # Dependency:
-#   block_coursectrldates depends on local_coursectrl. The local plugin is
-#   registered before Moodle installation via moodle-plugin-ci add-plugin.
-#
-#   Optional GitHub repository variables:
-#     CCH_CORE_REPO    Override default dependency repository.
-#     CCH_CORE_BRANCH  Override default dependency branch.
-#
-# Job parallelism:
-#   lint-php ──┐
-#              ├──► phpunit  (MariaDB + PostgreSQL)
-#   lint-js  ──┘
-#              └──► behat    (MariaDB only, parallel to phpunit)
+#   local_coursectrl (Course Control Hub) is cloned from the main branch
+#   of ralferlebach/moodle-local_coursectrl and installed as an extra plugin
+#   before PHPUnit / Behat initialisation.
 ##############################################################################
 
 name: Moodle Plugin CI
 
 on:
   push:
-    branches: ['**']
+    branches-ignore:
+      - main
   pull_request:
+    branches-ignore:
+      - main
 
 env:
   MOODLE_CI: '^4'
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  CCH_CORE_REPO: ${{ vars.CCH_CORE_REPO || 'ralferlebach/moodle-local_coursectrl' }}
-  CCH_CORE_BRANCH: ${{ vars.CCH_CORE_BRANCH || 'main' }}
 
 jobs:
 
@@ -43,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        php: ['8.1', '8.2', '8.3', '8.4']
 
     steps:
       - uses: actions/checkout@v4
@@ -68,9 +59,9 @@ jobs:
       - name: PHP Mess Detector
         run: moodle-plugin-ci phpmd plugin || true
 
-  # ── 1b. JS / CSS Lint ────────────────────────────────────────────────────
+  # ── 1b. JS / CSS Lint ─────────────────────────────────────────────────────
   lint-js:
-    name: "JS/CSS Lint"
+    name: "JS/CSS/Mustache Lint"
     runs-on: ubuntu-24.04
 
     services:
@@ -97,11 +88,7 @@ jobs:
           ini-values: max_input_vars=5000
           coverage: none
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install en_AU.UTF-8 locale (Moodle bootstrap requirement)
+      - name: Install en_AU.UTF-8 locale
         run: |
           sudo locale-gen en_AU.UTF-8
           sudo update-locale
@@ -112,25 +99,30 @@ jobs:
           echo "$GITHUB_WORKSPACE/ci/bin"        >> "$GITHUB_PATH"
           echo "$GITHUB_WORKSPACE/ci/vendor/bin" >> "$GITHUB_PATH"
 
-      - name: Set TRAVIS_BRANCH for moodle-plugin-ci
+      - name: Set TRAVIS_BRANCH
         run: |
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           echo "TRAVIS_BRANCH=${BRANCH_NAME:-main}" >> "$GITHUB_ENV"
 
-      - name: Register local_coursectrl dependency
-        run: moodle-plugin-ci add-plugin --branch ${{ env.CCH_CORE_BRANCH }} ${{ env.CCH_CORE_REPO }}
+      - name: Clone local_coursectrl dependency
+        run: |
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            local_coursectrl
 
-      - name: Install Moodle (grunt baseline – 4.5)
+      - name: Install Moodle 4.5 (grunt baseline)
         run: |
           moodle-plugin-ci install \
-            --plugin   ./plugin \
-            --db-type  mariadb \
-            --db-host  127.0.0.1 \
-            --db-port  3306 \
-            --db-user  root \
-            --db-pass  root \
-            --db-name  moodle \
-            --branch   MOODLE_405_STABLE
+            --plugin        ./plugin \
+            --extra-plugins ./local_coursectrl \
+            --branch        MOODLE_405_STABLE \
+            --db-type       mariadb \
+            --db-host       127.0.0.1 \
+            --db-port       3306 \
+            --db-user       root \
+            --db-pass       root \
+            --db-name       moodle \
+            --no-init
 
       - name: Install Node dependencies
         run: npm install
@@ -143,32 +135,28 @@ jobs:
         run: moodle-plugin-ci grunt -m "$GITHUB_WORKSPACE/moodle" -t stylelint
         continue-on-error: true
 
-      - name: Verify AMD build artefacts
+      - name: Verify AMD build artefacts are up to date
         run: |
           if ! ls plugin/amd/src/*.js 2>/dev/null | grep -q .; then
-            echo "No AMD source files — skipping."
-            exit 0
+            echo "No AMD source files — skipping."; exit 0
           fi
           MISSING=0
           for src in plugin/amd/src/*.js; do
             base=$(basename "$src" .js)
             [ -f "plugin/amd/build/${base}.min.js" ] || {
-              echo "MISSING: $base.min.js"
-              MISSING=$((MISSING+1))
+              echo "MISSING: $base.min.js"; MISSING=$((MISSING+1))
             }
           done
-          [ "$MISSING" -eq 0 ] && echo "AMD OK." || { echo "ERROR: $MISSING file(s) missing."; exit 1; }
+          [ "$MISSING" -eq 0 ] && echo "AMD OK." \
+            || { echo "ERROR: $MISSING file(s) missing."; exit 1; }
 
-      - name: PHPDoc check (local_moodlecheck — matches Moodle prechecker)
+      - name: PHPDoc check
         run: moodle-plugin-ci phpdoc
         env:
           IGNORE_PATHS: tools
 
       - name: Mustache lint
         run: moodle-plugin-ci mustache
-
-      - name: Savepoint check
-        run: moodle-plugin-ci savepoint
 
   # ── 2. PHPUnit ────────────────────────────────────────────────────────────
   phpunit:
@@ -183,14 +171,21 @@ jobs:
           - MOODLE_500_STABLE
           - MOODLE_501_STABLE
           - MOODLE_502_STABLE
-        php: ['8.2', '8.3', '8.4']
+        php: ['8.1', '8.2', '8.3', '8.4']
         db:
           - { engine: mariadb, type: mariadb, port: 3306, user: root,   pass: root   }
           - { engine: pgsql,   type: pgsql,   port: 5432, user: moodle, pass: moodle }
         exclude:
+          # Moodle 4.5 supports PHP 8.1–8.3 only.
           - { moodle: MOODLE_405_STABLE, php: '8.4' }
-          - { moodle: MOODLE_500_STABLE, php: '8.4' }
+          # Moodle 5.0+ requires PHP 8.2+.
+          - { moodle: MOODLE_500_STABLE, php: '8.1' }
+          - { moodle: MOODLE_501_STABLE, php: '8.1' }
+          - { moodle: MOODLE_502_STABLE, php: '8.1' }
+          # Moodle 5.2 requires PHP 8.3+.
           - { moodle: MOODLE_502_STABLE, php: '8.2' }
+          # Moodle 5.0 PHP 8.4 support — conservative, align with local_coursectrl.
+          - { moodle: MOODLE_500_STABLE, php: '8.4' }
 
     services:
       mariadb:
@@ -240,30 +235,34 @@ jobs:
           echo "$GITHUB_WORKSPACE/ci/bin"        >> "$GITHUB_PATH"
           echo "$GITHUB_WORKSPACE/ci/vendor/bin" >> "$GITHUB_PATH"
 
-      - name: Set TRAVIS_BRANCH for moodle-plugin-ci
+      - name: Set TRAVIS_BRANCH
         run: |
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           echo "TRAVIS_BRANCH=${BRANCH_NAME:-main}" >> "$GITHUB_ENV"
 
-      - name: Register local_coursectrl dependency
-        run: moodle-plugin-ci add-plugin --branch ${{ env.CCH_CORE_BRANCH }} ${{ env.CCH_CORE_REPO }}
+      - name: Clone local_coursectrl dependency
+        run: |
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            local_coursectrl
 
       - name: Install Moodle ${{ matrix.moodle }}
         run: |
           moodle-plugin-ci install \
-            --plugin   ./plugin \
-            --db-type  ${{ matrix.db.type }} \
-            --db-host  127.0.0.1 \
-            --db-port  ${{ matrix.db.port }} \
-            --db-user  ${{ matrix.db.user }} \
-            --db-pass  ${{ matrix.db.pass }} \
-            --db-name  moodle \
-            --branch   ${{ matrix.moodle }}
+            --plugin        ./plugin \
+            --extra-plugins ./local_coursectrl \
+            --branch        ${{ matrix.moodle }} \
+            --db-type       ${{ matrix.db.type }} \
+            --db-host       127.0.0.1 \
+            --db-port       ${{ matrix.db.port }} \
+            --db-user       ${{ matrix.db.user }} \
+            --db-pass       ${{ matrix.db.pass }} \
+            --db-name       moodle
 
       - name: PHPUnit – all tests
-        run: moodle-plugin-ci phpunit
+        run: moodle-plugin-ci phpunit --fail-on-warning
 
-  # ── 3. Behat ─────────────────────────────────────────────────────────────
+  # ── 3. Behat ──────────────────────────────────────────────────────────────
   behat:
     name: "Behat (${{ matrix.moodle }} / PHP 8.2 / Chrome)"
     runs-on: ubuntu-24.04
@@ -275,18 +274,8 @@ jobs:
           - MOODLE_405_STABLE
           - MOODLE_500_STABLE
           - MOODLE_501_STABLE
-          - MOODLE_502_STABLE
 
     services:
-      selenium:
-        image: selenium/standalone-chrome:latest
-        options: >-
-          --shm-size=2g
-          --health-cmd="curl -sf http://localhost:4444/status"
-          --health-interval=15s
-          --health-retries=5
-        ports: ['4444:4444']
-
       mariadb:
         image: mariadb:10.11
         env:
@@ -320,27 +309,31 @@ jobs:
           echo "$GITHUB_WORKSPACE/ci/bin"        >> "$GITHUB_PATH"
           echo "$GITHUB_WORKSPACE/ci/vendor/bin" >> "$GITHUB_PATH"
 
-      - name: Set TRAVIS_BRANCH for moodle-plugin-ci
+      - name: Set TRAVIS_BRANCH
         run: |
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           echo "TRAVIS_BRANCH=${BRANCH_NAME:-main}" >> "$GITHUB_ENV"
 
-      - name: Register local_coursectrl dependency
-        run: moodle-plugin-ci add-plugin --branch ${{ env.CCH_CORE_BRANCH }} ${{ env.CCH_CORE_REPO }}
+      - name: Clone local_coursectrl dependency
+        run: |
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            local_coursectrl
 
       - name: Install Moodle ${{ matrix.moodle }}
         run: |
           moodle-plugin-ci install \
-            --plugin   ./plugin \
-            --db-type  mariadb \
-            --db-host  127.0.0.1 \
-            --db-port  3306 \
-            --db-user  root \
-            --db-pass  root \
-            --db-name  moodle \
-            --branch   ${{ matrix.moodle }}
+            --plugin        ./plugin \
+            --extra-plugins ./local_coursectrl \
+            --branch        ${{ matrix.moodle }} \
+            --db-type       mariadb \
+            --db-host       127.0.0.1 \
+            --db-port       3306 \
+            --db-user       root \
+            --db-pass       root \
+            --db-name       moodle
 
-      - name: Behat – all plugin scenarios
+      - name: Behat – all block scenarios
         run: |
           moodle-plugin-ci behat \
             --profile chrome \

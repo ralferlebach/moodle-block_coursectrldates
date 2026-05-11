@@ -24,7 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['comingsoon'] = 'Course date overview will be available here soon.';
 $string['config_calendar_header'] = 'Calendar';
 $string['config_calendar_weeks'] = 'Number of weeks';
 $string['config_events_header'] = 'Event list';
@@ -44,8 +43,6 @@ $string['config_show_help'] = 'Offer setup help';
 $string['coursectrldates:addinstance'] = 'Add a Course dates block';
 $string['coursectrldates:myaddinstance'] = 'Add a Course dates block to Dashboard';
 $string['coursectrldates:view'] = 'View course date overview';
-$string['event_closes'] = 'closes';
-$string['event_opens'] = 'opens';
 $string['help_later'] = 'Later';
 $string['help_no'] = 'No';
 $string['help_question'] = 'Set up all course dates in the Course Control Hub now?';
@@ -56,12 +53,7 @@ $string['open_timeline'] = 'Open timeline';
 $string['pluginname'] = 'Course dates';
 $string['privacy:metadata'] = 'The Course dates block does not store any personal data of its own. The setup-help dismissed state is stored through Moodle\'s core user-preference API.';
 $string['privacy:metadata:preference:splash_dismissed'] = 'Stores whether the setup-help notification was permanently dismissed for a specific block instance.';
-$string['shift_dates'] = 'Shift dates';
 $string['shift_entry'] = 'Shift this date';
 $string['shift_following'] = 'Shift following dates';
 $string['shift_slot'] = 'Shift this time slot';
-$string['splash_dismiss'] = 'Dismiss';
-$string['splash_message'] = 'This course has been newly created, reset, or contains newly imported time-limited activities. Check your course dates.';
-$string['splash_title'] = 'Check course dates';
-$string['truncated'] = 'Showing {$a->shown} of {$a->total} events.';
 $string['view_all_in_timeline'] = 'View all in timeline';

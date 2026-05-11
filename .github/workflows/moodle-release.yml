@@ -1,0 +1,300 @@
+name: Moodle RC Prechecks
+
+on:
+  push:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: moodle-rc-prechecks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MOODLE_PLUGIN_CI_VERSION: '^4'
+
+jobs:
+  frontend-prechecks:
+    name: Moodle 4.5 frontend/grunt RC prechecks
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'push' || github.event.merge_group.base_ref == 'refs/heads/main' }}
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugin
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: >-
+            curl, dom, fileinfo, gd, iconv, intl, mbstring, mysqli, opcache,
+            pdo_mysql, pdo_pgsql, pgsql, soap, sodium, tokenizer, xml,
+            xmlreader, xmlwriter, zip
+          ini-values: max_input_vars=5000, memory_limit=1G
+          coverage: none
+
+      - name: Initialise moodle-plugin-ci
+        run: |
+          composer create-project --no-dev --prefer-dist --no-interaction \
+            moodlehq/moodle-plugin-ci ci "${MOODLE_PLUGIN_CI_VERSION}"
+          echo "${GITHUB_WORKSPACE}/ci/bin" >> "${GITHUB_PATH}"
+          echo "${GITHUB_WORKSPACE}/ci/vendor/bin" >> "${GITHUB_PATH}"
+          sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=${HOME}/.nvm" >> "${GITHUB_ENV}"
+
+      - name: Clone local_coursectrl dependency
+        run: |
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            local_coursectrl
+
+      - name: Install Moodle 4.5 frontend environment
+        run: |
+          moodle-plugin-ci install \
+            --plugin        ./plugin \
+            --extra-plugins ./local_coursectrl \
+            --db-host=127.0.0.1
+        env:
+          DB: pgsql
+          MOODLE_BRANCH: MOODLE_405_STABLE
+
+      - name: Report Moodle frontend toolchain
+        run: |
+          set -euxo pipefail
+          cd moodle
+          if [ -s "$HOME/.nvm/nvm.sh" ]; then
+            # shellcheck disable=SC1091
+            source "$HOME/.nvm/nvm.sh"
+          fi
+          nvm use || true
+          node --version
+          npm --version
+          npx grunt --version
+
+      - name: Grunt, ESLint, stylelint, gherkinlint and AMD build freshness
+        run: moodle-plugin-ci grunt --show-lint-warnings --max-lint-warnings 0
+
+      - name: Show AMD build diff on failure
+        if: ${{ failure() }}
+        run: |
+          set +e
+          cd plugin
+          git status --short -- amd/build || true
+          git diff -- amd/build/block.min.js amd/build/block.min.js.map || true
+
+  php-and-functional-prechecks:
+    name: Moodle ${{ matrix.moodle-branch }} / PHP ${{ matrix.php }} / ${{ matrix.database }}
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'push' || github.event.merge_group.base_ref == 'refs/heads/main' }}
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 'yes'
+          MARIADB_CHARACTER_SET_SERVER: utf8mb4
+          MARIADB_COLLATION_SERVER: utf8mb4_unicode_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - moodle-branch: MOODLE_405_STABLE
+            php: '8.1'
+            database: pgsql
+          - moodle-branch: MOODLE_405_STABLE
+            php: '8.1'
+            database: mariadb
+          - moodle-branch: MOODLE_405_STABLE
+            php: '8.3'
+            database: pgsql
+          - moodle-branch: MOODLE_405_STABLE
+            php: '8.3'
+            database: mariadb
+
+          - moodle-branch: MOODLE_500_STABLE
+            php: '8.2'
+            database: pgsql
+          - moodle-branch: MOODLE_500_STABLE
+            php: '8.2'
+            database: mariadb
+          - moodle-branch: MOODLE_500_STABLE
+            php: '8.4'
+            database: pgsql
+          - moodle-branch: MOODLE_500_STABLE
+            php: '8.4'
+            database: mariadb
+
+          - moodle-branch: MOODLE_501_STABLE
+            php: '8.2'
+            database: pgsql
+          - moodle-branch: MOODLE_501_STABLE
+            php: '8.2'
+            database: mariadb
+          - moodle-branch: MOODLE_501_STABLE
+            php: '8.4'
+            database: pgsql
+          - moodle-branch: MOODLE_501_STABLE
+            php: '8.4'
+            database: mariadb
+
+          - moodle-branch: MOODLE_502_STABLE
+            php: '8.3'
+            database: pgsql
+          - moodle-branch: MOODLE_502_STABLE
+            php: '8.3'
+            database: mariadb
+          - moodle-branch: MOODLE_502_STABLE
+            php: '8.4'
+            database: pgsql
+          - moodle-branch: MOODLE_502_STABLE
+            php: '8.4'
+            database: mariadb
+
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugin
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: >-
+            curl, dom, fileinfo, gd, iconv, intl, mbstring, mysqli, opcache,
+            pdo_mysql, pdo_pgsql, pgsql, soap, sodium, tokenizer, xml,
+            xmlreader, xmlwriter, zip
+          ini-values: max_input_vars=5000, memory_limit=1G
+          coverage: none
+
+      - name: Initialise moodle-plugin-ci
+        run: |
+          composer create-project --no-dev --prefer-dist --no-interaction \
+            moodlehq/moodle-plugin-ci ci "${MOODLE_PLUGIN_CI_VERSION}"
+          echo "${GITHUB_WORKSPACE}/ci/bin" >> "${GITHUB_PATH}"
+          echo "${GITHUB_WORKSPACE}/ci/vendor/bin" >> "${GITHUB_PATH}"
+          sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=${HOME}/.nvm" >> "${GITHUB_ENV}"
+
+      - name: Clone local_coursectrl dependency
+        run: |
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            local_coursectrl
+
+      - name: Install Moodle test site
+        run: |
+          moodle-plugin-ci install \
+            --plugin        ./plugin \
+            --extra-plugins ./local_coursectrl \
+            --db-host=127.0.0.1
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
+      - name: PHP syntax lint
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci phplint
+
+      - name: PHP copy/paste detector
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: moodle-plugin-ci phpcpd
+
+      - name: PHP Mess Detector
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: moodle-plugin-ci phpmd
+
+      - name: Moodle Code Checker
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci phpcs --max-warnings 0
+
+      - name: Moodle PHPDoc Checker
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci phpdoc --max-warnings 0
+
+      - name: Plugin structure validation
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci validate
+
+      - name: Upgrade savepoints validation
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci savepoints
+
+      - name: Mustache lint
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci mustache
+
+      - name: PHPUnit
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci phpunit --fail-on-warning
+
+      - name: Behat
+        id: behat
+        if: ${{ !cancelled() }}
+        run: >-
+          moodle-plugin-ci behat
+          --profile chrome
+          --tags "@block_coursectrldates and not @broken"
+          --start-servers
+
+      - name: Upload Behat faildump
+        if: ${{ failure() && steps.behat.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: behat-faildump-${{ matrix.moodle-branch }}-php${{ matrix.php }}-${{ matrix.database }}
+          path: ${{ github.workspace }}/moodledata/behat_dump
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Mark cancelled jobs as failed
+        if: ${{ cancelled() }}
+        run: exit 1

@@ -45,11 +45,12 @@ define([], function () {
             if (response.ok && helpcard) {
                 helpcard.remove();
             }
+            return null;
         })
         .catch(function () {
-            if (helpcard) {
-                helpcard.remove();
-            }
+            // Network or server error: preference was not stored.
+            // Leave the helpcard visible so the user can retry on next page load.
+            return null;
         });
     };
 

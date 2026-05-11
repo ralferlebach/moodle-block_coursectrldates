@@ -24,7 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['comingsoon'] = 'Die Kurs-Terminübersicht wird hier in Kürze verfügbar sein.';
 $string['config_calendar_header'] = 'Kalender';
 $string['config_calendar_weeks'] = 'Anzahl Wochen';
 $string['config_events_header'] = 'Terminliste';
@@ -44,8 +43,6 @@ $string['config_show_help'] = 'Einrichtungshilfe anbieten';
 $string['coursectrldates:addinstance'] = 'Block „Kurstermine" hinzufügen';
 $string['coursectrldates:myaddinstance'] = 'Block „Kurstermine" im Dashboard hinzufügen';
 $string['coursectrldates:view'] = 'Kurs-Terminübersicht anzeigen';
-$string['event_closes'] = 'schließt';
-$string['event_opens'] = 'öffnet';
 $string['help_later'] = 'Später';
 $string['help_no'] = 'Nein';
 $string['help_question'] = 'Jetzt in der Kursablauf-Zentrale alle Termine einrichten?';
@@ -56,12 +53,7 @@ $string['open_timeline'] = 'Timeline öffnen';
 $string['pluginname'] = 'Kurstermine';
 $string['privacy:metadata'] = 'Der Block „Kurstermine" speichert keine eigenen personenbezogenen Daten. Der Anzeigestatus der Einrichtungshilfe wird über die zentrale Benutzereinstellungs-API von Moodle verwaltet.';
 $string['privacy:metadata:preference:splash_dismissed'] = 'Speichert, ob die Einrichtungshilfe für eine bestimmte Block-Instanz dauerhaft ausgeblendet wurde.';
-$string['shift_dates'] = 'Termine verschieben';
 $string['shift_entry'] = 'Diesen Termin verschieben';
 $string['shift_following'] = 'Folgende Termine verschieben';
 $string['shift_slot'] = 'Diesen Zeitslot verschieben';
-$string['splash_dismiss'] = 'Ausblenden';
-$string['splash_message'] = 'Dieser Kurs wurde neu angelegt, zurückgesetzt oder enthält neu importierte zeitbegrenzte Inhalte. Bitte prüfen Sie die Kurstermine.';
-$string['splash_title'] = 'Kurstermine prüfen';
-$string['truncated'] = 'Es werden {$a->shown} von {$a->total} Terminen angezeigt.';
 $string['view_all_in_timeline'] = 'Alle in der Timeline anzeigen';
