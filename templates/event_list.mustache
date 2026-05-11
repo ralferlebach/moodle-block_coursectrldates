@@ -32,6 +32,7 @@
     * shiftslotlabel     {string}
     * shiftfollowinglabel {string}
     * shiftentrylabel    {string}
+    * canshift           {bool}   True when user has local/coursectrl:bulkaction.
 
     Example context (json):
     {
@@ -65,7 +66,8 @@
         "noeventsmessage": "No course dates found.",
         "shiftslotlabel": "Shift this time slot",
         "shiftfollowinglabel": "Shift following dates",
-        "shiftentrylabel": "Shift this date"
+        "shiftentrylabel": "Shift this date",
+        "canshift": true
     }
 }}
 <div class="block-coursectrldates-eventlist" data-region="coursectrldates-eventlist">
@@ -81,20 +83,24 @@
         <div class="card-body py-1 px-2">
             <div class="d-flex align-items-center justify-content-between mb-1">
                 <span class="small text-muted">{{timeformatted}}</span>
+                {{#canshift}}
                 <span class="d-flex gap-1">
                     <a href="{{shiftsloturl}}"
                        class="btn btn-sm btn-outline-secondary p-1 lh-1"
                        style="min-width:2.5rem"
-                       title="{{shiftslotlabel}}">
+                       title="{{shiftslotlabel}}"
+                       aria-label="{{shiftslotlabel}}">
                         <i class="fa fa-calendar-day fa-sm"></i>
                     </a>
                     <a href="{{shiftfollowingurl}}"
                        class="btn btn-sm btn-outline-secondary p-1 lh-1"
                        style="min-width:2.5rem"
-                       title="{{shiftfollowinglabel}}">
+                       title="{{shiftfollowinglabel}}"
+                       aria-label="{{shiftfollowinglabel}}">
                         <i class="fa fa-calendar-days fa-sm"></i>
                     </a>
                 </span>
+                {{/canshift}}
             </div>
             <ul class="list-group list-group-flush">
                 {{#entries}}
@@ -109,12 +115,15 @@
                         </span>
                     </span>
                     <span class="flex-shrink-0">
+                        {{#canshift}}
                         <a href="{{shiftentryurl}}"
                            class="btn btn-sm btn-outline-secondary p-1 lh-1"
                            style="min-width:2.5rem"
-                           title="{{shiftentrylabel}}">
+                           title="{{shiftentrylabel}}"
+                           aria-label="{{shiftentrylabel}}">
                             <i class="fa fa-calendar-day fa-sm"></i>
                         </a>
+                        {{/canshift}}
                     </span>
                 </li>
                 {{/entries}}

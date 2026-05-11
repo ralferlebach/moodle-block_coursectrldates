@@ -67,6 +67,9 @@ class config_reader {
      * @return bool
      */
     public function show_calendar(): bool {
+        if (!isset($this->config->show_calendar)) {
+            return true; // Default: shown.
+        }
         return !empty($this->config->show_calendar);
     }
 
@@ -119,6 +122,9 @@ class config_reader {
      * @return bool
      */
     public function show_help(): bool {
+        if (!isset($this->config->show_help)) {
+            return true; // Default: shown.
+        }
         return !empty($this->config->show_help);
     }
 
@@ -138,6 +144,9 @@ class config_reader {
      * @return bool
      */
     public function help_trigger_new(): bool {
+        if (!isset($this->config->help_trigger_new)) {
+            return true; // Default: active.
+        }
         return !empty($this->config->help_trigger_new);
     }
 
@@ -147,6 +156,9 @@ class config_reader {
      * @return bool
      */
     public function help_trigger_reset(): bool {
+        if (!isset($this->config->help_trigger_reset)) {
+            return true; // Default: active.
+        }
         return !empty($this->config->help_trigger_reset);
     }
 
@@ -156,6 +168,9 @@ class config_reader {
      * @return bool
      */
     public function help_trigger_timedeps(): bool {
+        if (!isset($this->config->help_trigger_timedeps)) {
+            return true; // Default: active.
+        }
         return !empty($this->config->help_trigger_timedeps);
     }
 

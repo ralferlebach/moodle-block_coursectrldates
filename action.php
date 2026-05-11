@@ -28,7 +28,7 @@
 require_once(__DIR__ . '/../../config.php');
 
 $instanceid = required_param('instanceid', PARAM_INT);
-$action     = required_param('action', PARAM_ALPHANUMEXT);
+$action     = required_param('action', PARAM_ALPHAEXT);
 $courseid   = required_param('courseid', PARAM_INT);
 
 require_sesskey();

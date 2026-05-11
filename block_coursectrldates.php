@@ -142,12 +142,14 @@ class block_coursectrldates extends block_base {
         $allentries = (new \local_coursectrl\local\analysis\date_collector())
             ->collect($snapshot->cms);
 
-        // Calendar: full course range, all entries.
+        // Calendar: configured number of weeks from today, not the full course range.
         $months = [];
         if ($config->show_calendar()) {
+            $calendarfrom = $now;
+            $calendarto   = $now + ($config->calendar_weeks() * WEEKSECS);
             $months = (new \local_coursectrl\local\analysis\calendar_grid_builder())->build(
-                (int) $snapshot->course->startdate,
-                $snapshot->course->enddate,
+                $calendarfrom,
+                $calendarto,
                 $allentries,
                 $now,
                 new \local_coursectrl\manager\calendar_manager()
@@ -233,8 +235,11 @@ class block_coursectrldates extends block_base {
             }
         }
 
+        // Shift buttons: only show for users with bulk-action capability in local_coursectrl.
+        $canshift = has_capability('local/coursectrl:bulkaction', $coursecontext);
+
         $data = $eventlist->export_for_template($OUTPUT);
-        $data['showhelp']     = $showhelp;
+        $data['canshift']     = $canshift;
         $data['helpdata']     = $helpdata;
         $data['showcalendar'] = $config->show_calendar() && !empty($months);
         $data['hascalendar']  = !empty($months);
