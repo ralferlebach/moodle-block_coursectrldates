@@ -224,10 +224,15 @@ class block_coursectrldates extends block_base {
                 $timelineurl = new \moodle_url('/local/coursectrl/timeline.php');
                 $timelineurl->param('courseid', $courseid);
 
+                $actionurl = new \moodle_url('/blocks/coursectrldates/action.php');
                 $helpdata = [
                     'question'    => get_string('help_question', 'block_coursectrldates'),
                     'timelineurl' => $timelineurl->out(false),
                     'dismissurl'  => $dismissurl->out(false),
+                    'actionurl'   => $actionurl->out(false),
+                    'instanceid'  => $this->instance->id,
+                    'courseid'    => $courseid,
+                    'sesskey'     => sesskey(),
                     'label_yes'   => get_string('help_yes', 'block_coursectrldates'),
                     'label_later' => get_string('help_later', 'block_coursectrldates'),
                     'label_no'    => get_string('help_no', 'block_coursectrldates'),

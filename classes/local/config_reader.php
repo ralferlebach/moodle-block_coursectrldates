@@ -43,6 +43,9 @@ class config_reader {
     /** @var int Default help trigger time window in weeks. */
     public const DEFAULT_HELP_WEEKS = 4;
 
+    /** @var int Maximum allowed value for list_count(). */
+    public const MAX_LIST_COUNT = 100;
+
     /** @var string List mode: show all events within a time window. */
     public const MODE_TIMEWINDOW = 'timewindow';
 
@@ -111,9 +114,6 @@ class config_reader {
      *
      * @return int
      */
-    /** @var int Maximum allowed value for list_count. */
-    public const MAX_LIST_COUNT = 100;
-
     /**
      * Fixed event count for count mode (minimum 1, maximum MAX_LIST_COUNT).
      *

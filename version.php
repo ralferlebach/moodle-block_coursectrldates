@@ -25,13 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'block_coursectrldates';
-$plugin->version      = 2026051110;
+$plugin->version      = 2026051112;
 $plugin->requires     = 2024042200; // Moodle 4.5.
 $plugin->dependencies = [
-    // Minimum version that provides inventory_service, date_collector,
-    // calendar_grid_builder, calendar_manager and local/coursectrl:bulkaction.
     'local_coursectrl' => 2026051100,
 ];
 $plugin->supported = [405, 502]; // Moodle 4.5 through 5.2.
-$plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '0.8.1';
+$plugin->maturity  = MATURITY_RC;
+$plugin->release   = '0.9.1';

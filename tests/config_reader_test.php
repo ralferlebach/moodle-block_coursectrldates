@@ -146,6 +146,18 @@ final class config_reader_test extends advanced_testcase {
     }
 
     /**
+     * list_count() is capped at MAX_LIST_COUNT.
+     *
+     * @return void
+     */
+    public function test_list_count_capped_at_maximum(): void {
+        $max = config_reader::MAX_LIST_COUNT;
+        $this->assertSame($max, (new config_reader((object) ['list_count' => 9999]))->list_count());
+        $this->assertSame($max, (new config_reader((object) ['list_count' => $max + 1]))->list_count());
+        $this->assertSame($max - 1, (new config_reader((object) ['list_count' => $max - 1]))->list_count());
+    }
+
+    /**
      * help_window_weeks() clamps values to the 1–6 range.
      *
      * @return void

@@ -30,7 +30,11 @@
     Context variables required for this template:
     * question     {string}
     * timelineurl  {string}
-    * dismissurl   {string}
+    * dismissurl   {string}  Fallback href for non-JS environments.
+    * actionurl    {string}  Base URL for the AJAX POST action.
+    * instanceid   {int}
+    * courseid     {int}
+    * sesskey      {string}
     * label_yes    {string}
     * label_later  {string}
     * label_no     {string}
@@ -40,6 +44,10 @@
         "question": "Jetzt in der Kursablauf-Zentrale alle Termine einrichten?",
         "timelineurl": "/local/coursectrl/timeline.php?courseid=2",
         "dismissurl": "/blocks/coursectrldates/action.php?action=dismiss_help&instanceid=3&courseid=2",
+        "actionurl": "/blocks/coursectrldates/action.php",
+        "instanceid": 3,
+        "courseid": 2,
+        "sesskey": "abc123",
         "label_yes": "Ja",
         "label_later": "Später",
         "label_no": "Nein"
@@ -59,7 +67,10 @@
                         <a href="{{timelineurl}}"
                            class="btn btn-primary btn-sm"
                            data-action="dismiss-help-and-go"
-                           data-dismiss-url="{{dismissurl}}">
+                           data-action-url="{{actionurl}}"
+                           data-instanceid="{{instanceid}}"
+                           data-courseid="{{courseid}}"
+                           data-sesskey="{{sesskey}}">
                             {{label_yes}}
                         </a>
                         <button type="button"
@@ -69,7 +80,11 @@
                         </button>
                         <a href="{{dismissurl}}"
                            class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
-                           data-action="dismiss-help">
+                           data-action="dismiss-help"
+                           data-action-url="{{actionurl}}"
+                           data-instanceid="{{instanceid}}"
+                           data-courseid="{{courseid}}"
+                           data-sesskey="{{sesskey}}">
                             {{label_no}}
                         </a>
                     </div>

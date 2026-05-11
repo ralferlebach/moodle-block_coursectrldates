@@ -32,13 +32,26 @@ define([], function () {
     /**
      * Dismiss the setup-help notification via AJAX.
      *
-     * @param {string}  url       Dismiss endpoint URL.
+     * @param {Element} el        Element carrying POST action data-attributes.
      * @param {Element} helpcard  Help card element to remove on success.
      * @returns {void}
      */
-    var dismissHelp = function (url, helpcard) {
-        fetch(url, {
-            method: 'GET',
+    var dismissHelp = function (el, helpcard) {
+        var actionurl  = el.dataset.actionUrl  || '';
+        var instanceid = el.dataset.instanceid || '';
+        var courseid   = el.dataset.courseid   || '';
+        var sess       = el.dataset.sesskey    || '';
+        if (!actionurl) {
+            return;
+        }
+        var formdata = new FormData();
+        formdata.append('action',     'dismiss_help');
+        formdata.append('instanceid', instanceid);
+        formdata.append('courseid',   courseid);
+        formdata.append('sesskey',    sess);
+        fetch(actionurl, {
+            method: 'POST',
+            body: formdata,
             headers: {'X-Requested-With': 'XMLHttpRequest'},
         })
         .then(function (response) {
@@ -71,14 +84,8 @@ define([], function () {
             // "Ja" — dismiss permanently and let default href navigation proceed.
             var btnYes = e.target.closest('[data-action="dismiss-help-and-go"]');
             if (btnYes) {
-                var dismissurl = btnYes.dataset.dismissUrl || '';
-                if (dismissurl) {
-                    // Fire and forget — page navigates away immediately.
-                    fetch(dismissurl, {
-                        method: 'GET',
-                        headers: {'X-Requested-With': 'XMLHttpRequest'},
-                    }).catch(function () {});
-                }
+                // Fire and forget via POST — page navigates via href immediately.
+                dismissHelp(btnYes, null);
                 return; // Default href navigation proceeds.
             }
 
@@ -96,7 +103,7 @@ define([], function () {
             var btnNo = e.target.closest('[data-action="dismiss-help"]');
             if (btnNo) {
                 e.preventDefault();
-                dismissHelp(btnNo.getAttribute('href'), helpcard);
+                dismissHelp(btnNo, helpcard);
             }
         });
     };
