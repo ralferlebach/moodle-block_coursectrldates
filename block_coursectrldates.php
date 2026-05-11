@@ -240,6 +240,7 @@ class block_coursectrldates extends block_base {
 
         $data = $eventlist->export_for_template($OUTPUT);
         $data['canshift']     = $canshift;
+        $data['showhelp']     = $showhelp;
         $data['helpdata']     = $helpdata;
         $data['showcalendar'] = $config->show_calendar() && !empty($months);
         $data['hascalendar']  = !empty($months);

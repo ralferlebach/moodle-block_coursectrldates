@@ -111,9 +111,17 @@ class config_reader {
      *
      * @return int
      */
+    /** @var int Maximum allowed value for list_count. */
+    public const MAX_LIST_COUNT = 100;
+
+    /**
+     * Fixed event count for count mode (minimum 1, maximum MAX_LIST_COUNT).
+     *
+     * @return int
+     */
     public function list_count(): int {
         $count = (int) ($this->config->list_count ?? self::DEFAULT_LIST_COUNT);
-        return max(1, $count);
+        return max(1, min(self::MAX_LIST_COUNT, $count));
     }
 
     /**

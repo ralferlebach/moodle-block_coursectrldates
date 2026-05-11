@@ -27,6 +27,7 @@
 
 MOODLE_ROOT   ?= /var/www/html/moodle45_aliseadele
 PLUGIN_DIR    ?= $(MOODLE_ROOT)/blocks/coursectrldates
+PLUGIN_REL    ?= blocks/coursectrldates
 PHP           ?= /usr/bin/php
 PHPCS         ?= phpcs
 PHPCBF        ?= phpcbf
@@ -176,12 +177,22 @@ amd:
 phpunit:
 	@echo ""
 	@echo "=== PHPUnit ==="
-	@if ! $(PHP) -r "define('CLI_SCRIPT',1); require '$(MOODLE_ROOT)/config.php'; "\
-		"exit(empty(\$$CFG->phpunit_dataroot) ? 1 : 0);" 2>/dev/null; then \
-		echo "SKIP: phpunit_dataroot not set in config.php."; \
-		echo "      Add to config.php and run: php admin/tool/phpunit/cli/init.php"; \
+	@if ! $(PHP) -r \
+	  "define('CLI_SCRIPT',1); require '$(MOODLE_ROOT)/config.php'; \
+	   exit(empty(\$$CFG->phpunit_dataroot) ? 1 : 0);" 2>/dev/null; then \
+	    echo "SKIP: phpunit_dataroot not configured."; \
+	    echo "      Add to config.php: \$$CFG->phpunit_dataroot = '...';"; \
 	else \
-		cd $(MOODLE_ROOT) && $(PHP) vendor/bin/phpunit \
-			--testsuite block_coursectrldates_testsuite \
-			--testdox 2>&1 | grep -vE '^ ✔ |^$$' || true; \
+	    output=$$(cd $(MOODLE_ROOT) && $(PHP) vendor/bin/phpunit \
+	        --testsuite block_coursectrldates_testsuite \
+	        --testdox 2>&1); \
+	    if echo "$$output" | grep -q "initialised for different version"; then \
+	        echo "PHPUnit environment outdated — reinitialising (this takes ~30 s)..."; \
+	        cd $(MOODLE_ROOT) && $(PHP) admin/tool/phpunit/cli/init.php; \
+	        cd $(MOODLE_ROOT) && $(PHP) vendor/bin/phpunit \
+	            --testsuite block_coursectrldates_testsuite \
+	            --testdox 2>&1 | grep -vE '^ ✔ |^$$' || true; \
+	    else \
+	        echo "$$output" | grep -vE '^ ✔ |^$$' || true; \
+	    fi; \
 	fi

@@ -104,25 +104,27 @@ jobs:
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           echo "TRAVIS_BRANCH=${BRANCH_NAME:-main}" >> "$GITHUB_ENV"
 
-      - name: Clone local_coursectrl dependency
-        run: |
-          git clone --depth=1 --branch main \
-            https://github.com/ralferlebach/moodle-local_coursectrl.git \
-            local_coursectrl
-
       - name: Install Moodle 4.5 (grunt baseline)
         run: |
           moodle-plugin-ci install \
-            --plugin        ./plugin \
-            --extra-plugins ./local_coursectrl \
-            --branch        MOODLE_405_STABLE \
-            --db-type       mariadb \
-            --db-host       127.0.0.1 \
-            --db-port       3306 \
-            --db-user       root \
-            --db-pass       root \
-            --db-name       moodle \
+            --plugin  ./plugin \
+            --branch  MOODLE_405_STABLE \
+            --db-type mariadb \
+            --db-host 127.0.0.1 \
+            --db-port 3306 \
+            --db-user root \
+            --db-pass root \
+            --db-name moodle \
             --no-init
+
+      - name: Clone and install local_coursectrl dependency
+        run: |
+          MOODLE_DIR=$([ -d "${{ github.workspace }}/moodle/public" ] \
+            && echo "${{ github.workspace }}/moodle/public" \
+            || echo "${{ github.workspace }}/moodle")
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            "$MOODLE_DIR/local/coursectrl"
 
       - name: Install Node dependencies
         run: npm install
@@ -240,24 +242,27 @@ jobs:
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           echo "TRAVIS_BRANCH=${BRANCH_NAME:-main}" >> "$GITHUB_ENV"
 
-      - name: Clone local_coursectrl dependency
-        run: |
-          git clone --depth=1 --branch main \
-            https://github.com/ralferlebach/moodle-local_coursectrl.git \
-            local_coursectrl
-
       - name: Install Moodle ${{ matrix.moodle }}
         run: |
           moodle-plugin-ci install \
-            --plugin        ./plugin \
-            --extra-plugins ./local_coursectrl \
-            --branch        ${{ matrix.moodle }} \
-            --db-type       ${{ matrix.db.type }} \
-            --db-host       127.0.0.1 \
-            --db-port       ${{ matrix.db.port }} \
-            --db-user       ${{ matrix.db.user }} \
-            --db-pass       ${{ matrix.db.pass }} \
-            --db-name       moodle
+            --plugin  ./plugin \
+            --branch  ${{ matrix.moodle }} \
+            --db-type ${{ matrix.db.type }} \
+            --db-host 127.0.0.1 \
+            --db-port ${{ matrix.db.port }} \
+            --db-user ${{ matrix.db.user }} \
+            --db-pass ${{ matrix.db.pass }} \
+            --db-name moodle
+
+      - name: Clone and install local_coursectrl dependency
+        run: |
+          MOODLE_DIR=$([ -d "${{ github.workspace }}/moodle/public" ] \
+            && echo "${{ github.workspace }}/moodle/public" \
+            || echo "${{ github.workspace }}/moodle")
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            "$MOODLE_DIR/local/coursectrl"
+          cd "$MOODLE_DIR" && php admin/tool/phpunit/cli/init.php
 
       - name: PHPUnit – all tests
         run: moodle-plugin-ci phpunit --fail-on-warning
@@ -314,24 +319,27 @@ jobs:
           BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           echo "TRAVIS_BRANCH=${BRANCH_NAME:-main}" >> "$GITHUB_ENV"
 
-      - name: Clone local_coursectrl dependency
-        run: |
-          git clone --depth=1 --branch main \
-            https://github.com/ralferlebach/moodle-local_coursectrl.git \
-            local_coursectrl
-
       - name: Install Moodle ${{ matrix.moodle }}
         run: |
           moodle-plugin-ci install \
-            --plugin        ./plugin \
-            --extra-plugins ./local_coursectrl \
-            --branch        ${{ matrix.moodle }} \
-            --db-type       mariadb \
-            --db-host       127.0.0.1 \
-            --db-port       3306 \
-            --db-user       root \
-            --db-pass       root \
-            --db-name       moodle
+            --plugin  ./plugin \
+            --branch  ${{ matrix.moodle }} \
+            --db-type mariadb \
+            --db-host 127.0.0.1 \
+            --db-port 3306 \
+            --db-user root \
+            --db-pass root \
+            --db-name moodle
+
+      - name: Clone and install local_coursectrl dependency
+        run: |
+          MOODLE_DIR=$([ -d "${{ github.workspace }}/moodle/public" ] \
+            && echo "${{ github.workspace }}/moodle/public" \
+            || echo "${{ github.workspace }}/moodle")
+          git clone --depth=1 --branch main \
+            https://github.com/ralferlebach/moodle-local_coursectrl.git \
+            "$MOODLE_DIR/local/coursectrl"
+          cd "$MOODLE_DIR" && php admin/tool/behat/cli/init.php
 
       - name: Behat – all block scenarios
         run: |

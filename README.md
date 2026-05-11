@@ -12,14 +12,15 @@ A companion block for the [Course Control Hub](https://github.com/ralferlebach/m
 ## Requirements
 
 - Moodle 4.5 or later
-- PHP 8.2 or later
-- `local_coursectrl` (Course Control Hub) installed and active
+- PHP 8.1 or later
+- `local_coursectrl` 1.2.0 or later (version 2026051100+)
 
 ## Installation
 
 1. Copy or clone this repository into `blocks/coursectrldates/` inside your Moodle installation.
-2. Visit **Site administration → Notifications** to trigger the plugin installation.
-3. Add the block to a course page via the block drawer.
+2. Ensure `local_coursectrl` is installed and up to date.
+3. Visit **Site administration → Notifications** to trigger the plugin installation.
+4. Add the block to a course page via the block drawer.
 
 ## Configuration
 
@@ -31,7 +32,7 @@ Each block instance can be configured independently:
 | Number of weeks (calendar) | Calendar range from today | 4 |
 | Display mode | Show a fixed number of events or a time window | Time window |
 | Time window (event list) | Weeks of events to display | 4 |
-| Number of events | Fixed event count (count mode) | 10 |
+| Number of events | Fixed event count (count mode, max 100) | 10 |
 | Offer setup help | Enable the setup-help notification | Yes |
 | Trigger: newly created | Fire when course was created in the time window | Yes |
 | Trigger: course reset | Fire when course was reset in the time window | Yes |
@@ -54,7 +55,7 @@ Shift actions are handled entirely by `local_coursectrl/timeline.php`.
 
 ## Development status
 
-`MATURITY_ALPHA` — functional but not yet fully test-covered. See the open issues for the path to Beta/RC.
+`MATURITY_BETA` — core functionality complete and tested; suitable for institutional testing and evaluation. Not yet recommended for production without prior site-specific validation.
 
 ## License
 
