@@ -1,0 +1,108 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_coursectrldates/calendar
+
+    Horizontally scrollable mini-calendar strip for the course-dates block.
+
+    Uses the same CSS classes (coursectrl-cal-month, coursectrl-cal-week,
+    cc, cc-primary, cc-today, etc.) and month/week/day structure as
+    local_coursectrl/timeline so the two views are visually identical.
+    The CSS is declared in local_coursectrl/styles.css and loaded globally.
+
+    This template is included as a partial from block_coursectrldates/block
+    and inherits the parent context. All variables below must therefore be
+    present at the top level of the block template context.
+
+    Context variables required for this template:
+    * months {array} Month objects from local_coursectrl\local\analysis\calendar_grid_builder::build().
+
+    Month object:
+    * monthlabel      {string}  Localised "Month Year" label.
+    * iscurrentmonth  {bool}
+    * hasfirstentry   {bool}
+    * firstentrykey   {string}  'Y-m-d' of first day with entries.
+    * weeks           {array}   Week objects.
+
+    Week object:
+    * days {array} Day cell objects.
+
+    Day cell object:
+    * day           {int}     Day of month (0 for padding cells).
+    * inmonth       {bool}    False for leading/trailing padding cells.
+    * daykey        {string}  'Y-m-d' (empty for padding cells).
+    * hasentries    {bool}
+    * hasholidays   {bool}
+    * holidaynames  {array}   [{name}]
+    * cellclass     {string}  Space-separated CSS classes (cc, cc-primary, etc.).
+
+    Example context (json):
+    {
+        "months": [{
+            "monthlabel": "April 2026",
+            "iscurrentmonth": true,
+            "hasfirstentry": false,
+            "firstentrykey": "",
+            "weeks": [
+                {"days": [
+                    {"day": 0, "inmonth": false, "daykey": "", "hasentries": false,
+                     "hasholidays": false, "holidaynames": [], "cellclass": "cc cc-out"},
+                    {"day": 1, "inmonth": true,  "daykey": "2026-04-01",
+                     "hasentries": false, "hasholidays": false,
+                     "holidaynames": [], "cellclass": "cc"}
+                ]}
+            ]
+        }]
+    }
+}}
+<div class="block-coursectrldates-calendar card mb-2"
+     data-region="coursectrldates-calwrapper">
+    <div class="card-body p-2">
+        <div class="d-flex flex-nowrap overflow-auto gap-2 pb-1 block-coursectrldates-calrow"
+             data-region="coursectrldates-calrow">
+            {{#months}}
+            <div class="coursectrl-cal-month{{#iscurrentmonth}} month-current{{/iscurrentmonth}}">
+                <div class="small fw-semibold py-1 text-center">
+                    {{#hasfirstentry}}
+                    <a href="#ccd-day-{{firstentrykey}}"
+                       class="text-decoration-none"
+                       data-action="jump-to-day"
+                       data-daykey="{{firstentrykey}}">{{monthlabel}}</a>
+                    {{/hasfirstentry}}
+                    {{^hasfirstentry}}{{monthlabel}}{{/hasfirstentry}}
+                </div>
+                {{#weeks}}
+                <div class="coursectrl-cal-week">
+                    {{#days}}
+                    <div class="{{cellclass}}"
+                         {{#hasentries}}
+                         data-action="jump-to-day"
+                         data-daykey="{{daykey}}"
+                         {{/hasentries}}
+                         {{#hasholidays}}
+                         title="{{#holidaynames}}{{name}} {{/holidaynames}}"
+                         {{/hasholidays}}>
+                        {{#inmonth}}{{day}}{{/inmonth}}{{^inmonth}}&nbsp;{{/inmonth}}
+                    </div>
+                    {{/days}}
+                </div>
+                {{/weeks}}
+            </div>
+            {{/months}}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,93 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_coursectrldates/splash
+
+    Termin-Assistent notification card for block_coursectrldates.
+
+    Shown as the sole block content when a trigger fires and the teacher has
+    not yet permanently dismissed it. Calendar and event list are hidden
+    while this card is visible.
+
+    Actions:
+    * "Ja"         — POST dismiss + navigate to manage.php.
+    * "Nein"       — remove card from DOM, reveal block content (no server call).
+    * "Abschalten" — POST disable_help; only shown to users with addinstance capability.
+
+    Context variables required for this template:
+    * splash_title   {string}  Card heading.
+    * question       {string}  First text paragraph.
+    * question2      {string}  Second text paragraph (the question).
+    * managepageurl  {string}  URL for manage.php?courseid=X.
+    * actionurl      {string}  URL for action.php (POST endpoint).
+    * instanceid     {int}
+    * courseid       {int}
+    * sesskey        {string}
+    * label_yes      {string}
+    * label_later    {string}
+    * label_no       {string}
+
+    Example context (json):
+    {
+        "splash_title":  "Termin-Assistent",
+        "question":      "Sie scheinen neue Inhalte importiert zu haben.",
+        "question2":     "Möchten Sie jetzt alle neuen Termine einrichten?",
+        "managepageurl": "/local/coursectrl/manage.php?courseid=2",
+        "actionurl":     "/blocks/coursectrldates/action.php",
+        "instanceid":    3,
+        "courseid":      2,
+        "sesskey":       "abc123",
+        "label_yes":     "Ja",
+        "label_later":   "Nein",
+        "label_no":      "Abschalten"
+    }
+}}
+<div class="block-coursectrldates-splash card border-0 shadow-sm mb-2"
+     data-region="coursectrldates-splash">
+    <div class="card-body py-3 px-3">
+        <h6 class="card-title fw-bold mb-2">{{splash_title}}</h6>
+        <p class="mb-1 small text-body">{{question}}</p>
+        <p class="mb-3 small text-body fw-semibold">{{question2}}</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{managepageurl}}"
+               class="btn btn-primary btn-sm block-coursectrldates-helpbtn"
+               data-action="dismiss-help-and-go"
+               data-action-url="{{actionurl}}"
+               data-instanceid="{{instanceid}}"
+               data-courseid="{{courseid}}"
+               data-sesskey="{{sesskey}}">
+                {{label_yes}}
+            </a>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm block-coursectrldates-helpbtn"
+                    data-action="defer-help">
+                {{label_later}}
+            </button>
+            {{#canmanage}}
+            <button type="button"
+                    class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
+                    data-action="disable-help"
+                    data-action-url="{{actionurl}}"
+                    data-instanceid="{{instanceid}}"
+                    data-courseid="{{courseid}}"
+                    data-sesskey="{{sesskey}}">
+                {{label_no}}
+            </button>
+            {{/canmanage}}
+        </div>
+    </div>
+</div>
