@@ -65,10 +65,6 @@ block_coursectrldates
 
 Shift actions are handled entirely by `local_coursectrl/timeline.php`.
 
-## Development status
-
-`MATURITY_STABLE` — validated by PHPUnit (48 tests, 114 assertions), Behat, PHPCS, and ESLint. Suitable for production use.
-
 ## Privacy
 
 The block stores no personal data of its own. Two Moodle user preferences per block instance are used to track dismiss and force-show state:
