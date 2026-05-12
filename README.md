@@ -5,13 +5,13 @@ A companion block for the [Course Control Hub](https://github.com/ralferlebach/m
 ## Features
 
 - **Mini calendar** — configurable 1–6 week view from today, highlighting days with upcoming activity dates
-- **Chronological event list** — groups upcoming dates by day → time slot → activity entry
+- **Chronological event list** — groups upcoming dates by day → time slot → activity entry, sorted chronologically
 - **Shift buttons** — slot, following, and per-entry shift links that open the `local_coursectrl` timeline with the shift dialog pre-opened (only shown to users with `local/coursectrl:bulkaction` capability)
 - **Setup-help notification** — context-aware banner that appears when a new-start event is detected (course newly created, reset, or time-dependent activities added); configurable triggers and time window
 
 ## Requirements
 
-- Moodle 4.5 or later
+- Moodle 4.5 – 5.2
 - PHP 8.1 or later
 - `local_coursectrl` 1.2.0 or later (version 2026051100+)
 
@@ -55,7 +55,7 @@ Shift actions are handled entirely by `local_coursectrl/timeline.php`.
 
 ## Development status
 
-`MATURITY_BETA` — core functionality complete and tested; suitable for institutional testing and evaluation. Not yet recommended for production without prior site-specific validation.
+`MATURITY_RC` — feature-complete and passing full test suite. Suitable for final validation before production deployment.
 
 ## License
 

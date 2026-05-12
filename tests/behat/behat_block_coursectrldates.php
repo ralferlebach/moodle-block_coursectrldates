@@ -173,7 +173,10 @@ class behat_block_coursectrldates extends behat_base {
             );
         }
         $node->click();
-        // Allow the AJAX dismiss request to complete.
-        $this->getSession()->wait(2000, 'document.readyState === "complete"');
+        // Wait until the splash card is removed from the DOM (confirms POST succeeded).
+        $this->getSession()->wait(
+            5000,
+            'document.querySelector(\'[data-region="coursectrldates-splash"]\') === null'
+        );
     }
 }

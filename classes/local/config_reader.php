@@ -110,11 +110,6 @@ class config_reader {
     }
 
     /**
-     * Fixed event count for count mode (minimum 1).
-     *
-     * @return int
-     */
-    /**
      * Fixed event count for count mode (minimum 1, maximum MAX_LIST_COUNT).
      *
      * @return int

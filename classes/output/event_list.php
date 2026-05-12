@@ -123,7 +123,8 @@ class event_list implements renderable, templatable {
         $daygroups = [];
         foreach ($this->events as $event) {
             $ts      = (int) $event['timestamp'];
-            $daykey  = date('Y-m-d', $ts);
+            // Use user timezone so daykey matches the visible date label.
+            $daykey  = userdate($ts, '%Y-%m-%d');
             $slotkey = $ts;
 
             if (!isset($daygroups[$daykey])) {

@@ -34,7 +34,7 @@ define([], function () {
      *
      * @param {Element} el        Element carrying POST action data-attributes.
      * @param {Element} helpcard  Help card element to remove on success.
-     * @returns {void}
+     * @returns {Promise} Resolves when the dismiss request is complete.
      */
     var dismissHelp = function (el, helpcard) {
         var actionurl  = el.dataset.actionUrl  || '';
@@ -42,14 +42,14 @@ define([], function () {
         var courseid   = el.dataset.courseid   || '';
         var sess       = el.dataset.sesskey    || '';
         if (!actionurl) {
-            return;
+            return Promise.resolve(null);
         }
         var formdata = new FormData();
         formdata.append('action',     'dismiss_help');
         formdata.append('instanceid', instanceid);
         formdata.append('courseid',   courseid);
         formdata.append('sesskey',    sess);
-        fetch(actionurl, {
+        return fetch(actionurl, {
             method: 'POST',
             body: formdata,
             headers: {'X-Requested-With': 'XMLHttpRequest'},
@@ -84,9 +84,14 @@ define([], function () {
             // "Ja" — dismiss permanently and let default href navigation proceed.
             var btnYes = e.target.closest('[data-action="dismiss-help-and-go"]');
             if (btnYes) {
-                // Fire and forget via POST — page navigates via href immediately.
-                dismissHelp(btnYes, null);
-                return; // Default href navigation proceeds.
+                // Wait for POST to complete, then navigate — prevents race condition.
+                e.preventDefault();
+                var targeturl = btnYes.getAttribute('href');
+                dismissHelp(btnYes, null).then(function () {
+                    window.location.href = targeturl;
+                    return null;
+                });
+                return;
             }
 
             // "Später" — remove from DOM without a server call.

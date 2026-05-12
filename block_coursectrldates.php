@@ -174,6 +174,22 @@ class block_coursectrldates extends block_base {
             }
         }
 
+        // Sort chronologically regardless of date_collector output order.
+        usort(
+            $futureentries,
+            function (array $a, array $b): int {
+                $bytime = ((int) $a['timestamp']) <=> ((int) $b['timestamp']);
+                if ($bytime !== 0) {
+                    return $bytime;
+                }
+                $bycmid = ((int) ($a['cmid'] ?? 0)) <=> ((int) ($b['cmid'] ?? 0));
+                if ($bycmid !== 0) {
+                    return $bycmid;
+                }
+                return strcmp((string) ($a['field'] ?? ''), (string) ($b['field'] ?? ''));
+            }
+        );
+
         $total = count($futureentries);
         if ($config->list_mode() === \block_coursectrldates\local\config_reader::MODE_COUNT) {
             $showentries = array_slice($futureentries, 0, $config->list_count());
@@ -224,15 +240,10 @@ class block_coursectrldates extends block_base {
                 $timelineurl = new \moodle_url('/local/coursectrl/timeline.php');
                 $timelineurl->param('courseid', $courseid);
 
-                $actionurl = new \moodle_url('/blocks/coursectrldates/action.php');
                 $helpdata = [
                     'question'    => get_string('help_question', 'block_coursectrldates'),
                     'timelineurl' => $timelineurl->out(false),
                     'dismissurl'  => $dismissurl->out(false),
-                    'actionurl'   => $actionurl->out(false),
-                    'instanceid'  => $this->instance->id,
-                    'courseid'    => $courseid,
-                    'sesskey'     => sesskey(),
                     'label_yes'   => get_string('help_yes', 'block_coursectrldates'),
                     'label_later' => get_string('help_later', 'block_coursectrldates'),
                     'label_no'    => get_string('help_no', 'block_coursectrldates'),
@@ -257,6 +268,20 @@ class block_coursectrldates extends block_base {
         );
 
         return $this->content;
+    }
+
+    /**
+     * Remove per-user splash-dismissed preferences when the block instance is deleted.
+     *
+     * @return bool
+     */
+    public function instance_delete(): bool {
+        global $DB;
+
+        $prefkey = \block_coursectrldates\local\splash_state::PREF_PREFIX . $this->instance->id;
+        $DB->delete_records('user_preferences', ['name' => $prefkey]);
+
+        return parent::instance_delete();
     }
 
     /**
