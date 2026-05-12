@@ -75,12 +75,6 @@ class block_coursectrldates extends block_base {
         ];
     }
 
-    /**
-     * Intercept config save to handle the reset-help option.
-     *
-     * @param stdClass $data Form data.
-     * @param bool     $nolongerused Legacy parameter (unused).
-     * @return stdClass
 
     /**
      * Produce the block content.
@@ -211,32 +205,31 @@ class block_coursectrldates extends block_base {
             );
             if (
                 !$splashstate->is_dismissed()
-                && (new \block_coursectrldates\local\setup_help_detector())
-                    ->should_show($courseid, $config, $snapshot->cms)
+                && (
+                    $splashstate->is_forced()
+                    || (new \block_coursectrldates\local\setup_help_detector())
+                        ->should_show($courseid, $config, $snapshot->cms)
+                )
             ) {
                 $showhelp = true;
-
-                $dismissurl = new \moodle_url('/blocks/coursectrldates/action.php');
-                $dismissurl->param('action', 'dismiss_help');
-                $dismissurl->param('instanceid', $this->instance->id);
-                $dismissurl->param('courseid', $courseid);
-                $dismissurl->param('sesskey', sesskey());
-
-                $timelineurl = new \moodle_url('/local/coursectrl/timeline.php');
-                $timelineurl->param('courseid', $courseid);
+                // Clear force flag so it is a one-shot display.
+                $splashstate->clear_force();
 
                 $actionurl = new \moodle_url('/blocks/coursectrldates/action.php');
+                $managepageurl = new \moodle_url('/local/coursectrl/manage.php');
+                $managepageurl->param('courseid', $courseid);
                 $helpdata = [
-                    'question'    => get_string('help_question', 'block_coursectrldates'),
-                    'timelineurl' => $timelineurl->out(false),
-                    'dismissurl'  => $dismissurl->out(false),
-                    'actionurl'   => $actionurl->out(false),
-                    'instanceid'  => $this->instance->id,
-                    'courseid'    => $courseid,
-                    'sesskey'     => sesskey(),
-                    'label_yes'   => get_string('help_yes', 'block_coursectrldates'),
-                    'label_later' => get_string('help_later', 'block_coursectrldates'),
-                    'label_no'    => get_string('help_no', 'block_coursectrldates'),
+                    'splash_title' => get_string('splash_title', 'block_coursectrldates'),
+                    'question'     => get_string('help_question', 'block_coursectrldates'),
+                    'question2'    => get_string('help_question2', 'block_coursectrldates'),
+                    'managepageurl' => $managepageurl->out(false),
+                    'actionurl'    => $actionurl->out(false),
+                    'instanceid'   => $this->instance->id,
+                    'courseid'     => $courseid,
+                    'sesskey'      => sesskey(),
+                    'label_yes'    => get_string('help_yes', 'block_coursectrldates'),
+                    'label_later'  => get_string('help_later', 'block_coursectrldates'),
+                    'label_no'     => get_string('help_no', 'block_coursectrldates'),
                 ];
             }
         }
@@ -246,8 +239,9 @@ class block_coursectrldates extends block_base {
 
         $data = $eventlist->export_for_template($OUTPUT);
         $data['canshift']     = $canshift;
-        $data['showhelp']     = $showhelp;
-        $data['helpdata']     = $helpdata;
+        $data['showhelp']      = $showhelp;
+        $data['mainhiddenclass'] = $showhelp ? 'block-coursectrldates-hidden' : '';
+        $data['helpdata']      = $helpdata;
         $data['showcalendar'] = $config->show_calendar() && !empty($months);
         $data['hascalendar']  = !empty($months);
         $data['months']       = $months;

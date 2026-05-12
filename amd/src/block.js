@@ -25,42 +25,44 @@
  * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function () {
+define([], function() {
 
     'use strict';
 
     /**
      * Dismiss the setup-help notification via AJAX.
      *
-     * @param {Element} el        Element carrying POST action data-attributes.
-     * @param {Element} helpcard  Help card element to remove on success.
-     * @returns {Promise} Resolves when the dismiss request is complete.
+     * @param {Element} el           Element carrying POST action data-attributes.
+     * @param {Element} helpcard     Help card element to remove on success.
+     * @param {string}  [action]     POST action name (default: 'dismiss_help').
+     * @returns {Promise} Resolves when the request is complete.
      */
-    var dismissHelp = function (el, helpcard) {
-        var actionurl  = el.dataset.actionUrl  || '';
+    var dismissHelp = function(el, helpcard, action) {
+        var actionurl = el.dataset.actionUrl || '';
         var instanceid = el.dataset.instanceid || '';
-        var courseid   = el.dataset.courseid   || '';
-        var sess       = el.dataset.sesskey    || '';
+        var courseid = el.dataset.courseid || '';
+        var sess = el.dataset.sesskey || '';
         if (!actionurl) {
             return Promise.resolve(null);
         }
         var formdata = new FormData();
-        formdata.append('action',     'dismiss_help');
+        var actionname = action || 'dismiss_help';
+        formdata.append('action', actionname);
         formdata.append('instanceid', instanceid);
-        formdata.append('courseid',   courseid);
-        formdata.append('sesskey',    sess);
+        formdata.append('courseid', courseid);
+        formdata.append('sesskey', sess);
         return fetch(actionurl, {
             method: 'POST',
             body: formdata,
             headers: {'X-Requested-With': 'XMLHttpRequest'},
         })
-        .then(function (response) {
+        .then(function(response) {
             if (response.ok && helpcard) {
                 helpcard.remove();
             }
             return null;
         })
-        .catch(function () {
+        .catch(function() {
             // Network or server error: preference was not stored.
             // Leave the helpcard visible so the user can retry on next page load.
             return null;
@@ -72,13 +74,13 @@ define([], function () {
      *
      *   data-action="dismiss-help-and-go"  — permanently dismiss + navigate.
      *   data-action="defer-help"           — remove from DOM, no server call.
-     *   data-action="dismiss-help"         — permanently dismiss, no navigate.
+     *   data-action="disable-help"         — disable Termin-Assistent + dismiss, then reload.
      *
      * @param {Element} root Block root element.
      * @returns {void}
      */
-    var attachHelpHandlers = function (root) {
-        root.addEventListener('click', function (e) {
+    var attachHelpHandlers = function(root) {
+        root.addEventListener('click', function(e) {
             var helpcard = root.querySelector('[data-region="coursectrldates-splash"]');
 
             // "Ja" — dismiss permanently and let default href navigation proceed.
@@ -87,7 +89,10 @@ define([], function () {
                 // Wait for POST to complete, then navigate — prevents race condition.
                 e.preventDefault();
                 var targeturl = btnYes.getAttribute('href');
-                dismissHelp(btnYes, null).then(function () {
+                dismissHelp(btnYes, null).then(function() {
+                    window.location.href = targeturl;
+                    return null;
+                }).catch(function() {
                     window.location.href = targeturl;
                     return null;
                 });
@@ -101,14 +106,27 @@ define([], function () {
                 if (helpcard) {
                     helpcard.remove();
                 }
+                // Reveal main block content hidden while splash was active.
+                var maincontent = root.querySelector('[data-region="coursectrldates-main"]');
+                if (maincontent) {
+                    maincontent.classList.remove('block-coursectrldates-hidden');
+                }
                 return;
             }
 
             // "Nein" — permanently dismiss without navigation.
-            var btnNo = e.target.closest('[data-action="dismiss-help"]');
-            if (btnNo) {
+            var btnOff = e.target.closest('[data-action="disable-help"]');
+            if (btnOff) {
                 e.preventDefault();
-                dismissHelp(btnNo, helpcard);
+                // Disable Termin-Assistent permanently, then reload to show normal content.
+                dismissHelp(btnOff, null, 'disable_help').then(function() {
+                    window.location.reload();
+                    return null;
+                }).catch(function() {
+                    window.location.reload();
+                    return null;
+                });
+                return;
             }
         });
     };
@@ -122,7 +140,7 @@ define([], function () {
      * @param {Element} root Block root element.
      * @returns {void}
      */
-    var scrollCalendarToToday = function (root) {
+    var scrollCalendarToToday = function(root) {
         var calrow = root.querySelector('[data-region="coursectrldates-calrow"]');
         if (!calrow) {
             return;
@@ -146,8 +164,8 @@ define([], function () {
      * @param {Element} root Block root element.
      * @returns {void}
      */
-    var attachJumpToDay = function (root) {
-        root.addEventListener('click', function (e) {
+    var attachJumpToDay = function(root) {
+        root.addEventListener('click', function(e) {
             var cell = e.target.closest('[data-action="jump-to-day"]');
             if (!cell) {
                 return;
@@ -172,7 +190,7 @@ define([], function () {
          * @param {Element} root Block root element.
          * @returns {void}
          */
-        init: function (root) {
+        init: function(root) {
             if (!root) {
                 return;
             }

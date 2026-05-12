@@ -164,19 +164,14 @@ class block_coursectrldates_edit_form extends block_edit_form {
             'sesskey'    => sesskey(),
             'returnurl'  => $this->block->page->url->out_as_local_url(false),
         ]);
-        $label    = get_string('config_reset_help', 'block_coursectrldates');
-        $desc     = get_string('config_reset_help_desc', 'block_coursectrldates');
-        $btnhtml  = '<div class="form-group row fitem">';
-        $btnhtml .= '<div class="col-md-3 col-form-label d-flex pb-0 pr-md-0"></div>';
-        $btnhtml .= '<div class="col-md-9 form-inline align-items-start felement">';
-        $btnhtml .= '<div>';
-        $btnhtml .= '<a href="' . $reseturl->out(false) . '"';
-        $btnhtml .= ' class="btn btn-outline-secondary btn-sm">';
-        $btnhtml .= htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
-        $btnhtml .= '</a>';
-        $btnhtml .= '<div class="form-control-feedback">' . $desc . '</div>';
-        $btnhtml .= '</div></div></div>';
-        $mform->addElement('html', $btnhtml);
-        $mform->hideIf('config_show_help', 'config_show_help', 'notchecked');
+        $resetlabel = htmlspecialchars(
+            get_string('config_reset_help', 'block_coursectrldates'),
+            ENT_QUOTES,
+            'UTF-8'
+        );
+        $resetbtn = '<a href="' . $reseturl->out(false) . '"'
+            . ' class="btn btn-outline-secondary btn-sm">' . $resetlabel . '</a>';
+        $mform->addElement('static', 'reset_help_display', '', $resetbtn);
+        $mform->hideIf('reset_help_display', 'config_show_help', 'notchecked');
     }
 }

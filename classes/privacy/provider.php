@@ -51,6 +51,10 @@ class provider implements
             splash_state::PREF_PREFIX,
             'privacy:metadata:preference:splash_dismissed'
         );
+        $collection->add_user_preference(
+            splash_state::FORCE_PREFIX,
+            'privacy:metadata:preference:splash_dismissed'
+        );
         return $collection;
     }
 
@@ -78,6 +82,25 @@ class provider implements
         );
 
         foreach ($prefs as $pref) {
+            writer::export_user_preference(
+                'block_coursectrldates',
+                $pref->name,
+                $pref->value,
+                get_string(
+                    'privacy:metadata:preference:splash_dismissed',
+                    'block_coursectrldates'
+                )
+            );
+        }
+
+        // Export force-show preferences (temporary, cleared after display).
+        $escapedforce = $DB->sql_like_escape(splash_state::FORCE_PREFIX);
+        $forceprefs = $DB->get_records_select(
+            'user_preferences',
+            "userid = :userid AND {$like}",
+            ['userid' => $userid, 'prefix' => $escapedforce . '%']
+        );
+        foreach ($forceprefs as $pref) {
             writer::export_user_preference(
                 'block_coursectrldates',
                 $pref->name,

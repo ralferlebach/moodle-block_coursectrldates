@@ -1,4 +1,4 @@
-# Makefile for local_coursectrl
+# Makefile for block_coursectrldates
 # Mirrors the moodle-plugin-ci check suite used in GitHub Actions.
 # All checks run to completion even if individual steps report errors.
 #
@@ -26,8 +26,9 @@
 #   make phpunit        — PHPUnit testsuite for this plugin
 
 MOODLE_ROOT   ?= /var/www/html/moodle45_aliseadele
-PLUGIN_DIR    ?= $(MOODLE_ROOT)/blocks/coursectrldates
+PLUGIN_NAME   ?= block_coursectrldates
 PLUGIN_REL    ?= blocks/coursectrldates
+PLUGIN_DIR    ?= $(MOODLE_ROOT)/$(PLUGIN_REL)
 PHP           ?= /usr/bin/php
 PHPCS         ?= phpcs
 PHPCBF        ?= phpcbf
@@ -98,8 +99,8 @@ lint-phpdoc:
 	@echo ""
 	@echo "=== PHPDoc (local_moodlecheck, excludes tools/) ==="
 	-cd $(MOODLE_ROOT) && $(PHP) local/moodlecheck/cli/moodlecheck.php \
-		--path=local/coursectrl \
-		--exclude=local/coursectrl/tools \
+		--path=$(PLUGIN_REL) \
+		--exclude=$(PLUGIN_REL)/tools \
 		--format=text 2>&1 | grep -B1 '    Line' | grep -v '^--$$' || true
 
 # ---------------------------------------------------------------------------
@@ -143,7 +144,7 @@ lint-js:
 	@echo ""
 	@echo "=== ESLint ==="
 	-cd $(MOODLE_ROOT) && $(NPX) grunt eslint --root=. \
-		--files=local/coursectrl/amd/src/ \
+		--files=$(PLUGIN_REL)/amd/src/ \
 		--show-lint-warnings
 
 # ---------------------------------------------------------------------------
@@ -162,7 +163,7 @@ lint-gherkin:
 amd:
 	@echo ""
 	@echo "=== Rebuilding AMD (plugin only, grunt amd --files) ==="
-	-cd $(MOODLE_ROOT) && files=$$(find local/coursectrl/amd/src -name '*.js' \
+	-cd $(MOODLE_ROOT) && files=$$(find $(PLUGIN_REL)/amd/src -name '*.js' \
 	    | tr '\n' ',' | sed 's/,$$//'); \
 	    $(NPX) grunt amd --root=. --force --files="$$files"
 
@@ -184,15 +185,15 @@ phpunit:
 	    echo "      Add to config.php: \$$CFG->phpunit_dataroot = '...';"; \
 	else \
 	    output=$$(cd $(MOODLE_ROOT) && $(PHP) vendor/bin/phpunit \
-	        --testsuite block_coursectrldates_testsuite \
+	        --testsuite $(PLUGIN_NAME)_testsuite \
 	        --testdox 2>&1); \
-	    if echo "$$output" | grep -q "initialised for different version"; then \
+	    if printf '%s\n' "$$output" | grep -q "initialised for different version"; then \
 	        echo "PHPUnit environment outdated — reinitialising (this takes ~30 s)..."; \
 	        cd $(MOODLE_ROOT) && $(PHP) admin/tool/phpunit/cli/init.php; \
 	        cd $(MOODLE_ROOT) && $(PHP) vendor/bin/phpunit \
-	            --testsuite block_coursectrldates_testsuite \
-	            --testdox 2>&1 | grep -vE '^ ✔ |^$$' || true; \
+	            --testsuite $(PLUGIN_NAME)_testsuite \
+	            --testdox 2>&1 | grep -vE '^ . |^$$' || true; \
 	    else \
-	        echo "$$output" | grep -vE '^ ✔ |^$$' || true; \
+	        printf '%s\n' "$$output" | grep -vE '^ . |^$$' || true; \
 	    fi; \
 	fi

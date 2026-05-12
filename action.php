@@ -47,6 +47,41 @@ require_capability('block/coursectrldates:view', $blockcontext);
 $isajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
     && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
+/**
+ * Update the show_help config flag for a block instance.
+ *
+ * Directly writes to block_instances.configdata so the change takes
+ * effect on the next page load without requiring a form submission.
+ *
+ * @param int  $instanceid Block instance ID.
+ * @param bool $enable     True to enable, false to disable.
+ * @return void
+ */
+function update_block_show_help(int $instanceid, bool $enable): void {
+    global $DB;
+    $record = $DB->get_record(
+        'block_instances',
+        ['id' => $instanceid],
+        'id, configdata',
+        MUST_EXIST
+    );
+    // phpcs:disable moodle.PHP.ForbiddenFunctions.Found -- Block configdata is written by Moodle, not user input.
+    $config = !empty($record->configdata)
+        ? unserialize(base64_decode($record->configdata), ['allowed_classes' => [stdClass::class]])
+        : null;
+    // phpcs:enable moodle.PHP.ForbiddenFunctions.Found
+    if (!is_object($config)) {
+        $config = new stdClass();
+    }
+    $config->show_help = $enable ? '1' : '0';
+    $DB->set_field(
+        'block_instances',
+        'configdata',
+        base64_encode(serialize($config)),
+        ['id' => $instanceid]
+    );
+}
+
 switch ($action) {
     case 'dismiss_help':
     case 'dismiss_splash':
@@ -55,10 +90,20 @@ switch ($action) {
         $state->dismiss();
         break;
 
+    case 'disable_help':
+        // Permanently dismiss the Termin-Assistent AND disable it in the block config.
+        $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
+        $state->dismiss();
+        update_block_show_help($instanceid, false);
+        break;
+
     case 'reset_help':
-        // Reset dismissed state so the setup-help notification reappears.
+        // Reset dismissed state, set force-show flag, and re-enable the
+        // Termin-Assistent in case it was disabled via Abschalten.
         $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
         $state->reset();
+        $state->force();
+        update_block_show_help($instanceid, true);
         break;
 
     default:

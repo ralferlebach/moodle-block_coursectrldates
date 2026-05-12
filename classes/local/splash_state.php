@@ -40,6 +40,9 @@ class splash_state {
      */
     public const PREF_PREFIX = 'block_coursectrldates_splash_dismissed_';
 
+    /** @var string Preference key prefix for the force-show state. */
+    public const FORCE_PREFIX = 'block_coursectrldates_force_show_';
+
     /** @var int Block instance ID. */
     private int $instanceid;
 
@@ -83,6 +86,38 @@ class splash_state {
      */
     public function reset(): void {
         unset_user_preference($this->pref_key(), $this->userid);
+    }
+
+    /**
+     * Set the force-show flag so the splash appears on the next page load
+     * regardless of trigger conditions.
+     *
+     * @return void
+     */
+    public function force(): void {
+        set_user_preference(self::FORCE_PREFIX . $this->instanceid, 1, $this->userid);
+    }
+
+    /**
+     * Clear the force-show flag after the splash has been displayed.
+     *
+     * @return void
+     */
+    public function clear_force(): void {
+        unset_user_preference(self::FORCE_PREFIX . $this->instanceid, $this->userid);
+    }
+
+    /**
+     * Whether the force-show flag is currently set.
+     *
+     * @return bool
+     */
+    public function is_forced(): bool {
+        return (bool) get_user_preferences(
+            self::FORCE_PREFIX . $this->instanceid,
+            0,
+            $this->userid
+        );
     }
 
     /**

@@ -17,79 +17,75 @@
 {{!
     @template block_coursectrldates/splash
 
-    Setup-help (Einrichtungshilfe) notification card for block_coursectrldates.
+    Termin-Assistent notification card for block_coursectrldates.
 
-    Shown above block content when a trigger fires and the teacher has not
-    yet permanently dismissed it.
+    Shown as the sole block content when a trigger fires and the teacher has
+    not yet permanently dismissed it. Calendar and event list are hidden
+    while this card is visible.
 
     Actions:
-    * "Ja"     — AMD dismisses permanently and navigates to timeline.
-    * "Später" — AMD removes the card from DOM, no server call, reappears next load.
-    * "Nein"   — AMD dismisses permanently without navigation.
+    * "Ja"         — POST dismiss + navigate to manage.php.
+    * "Nein"       — remove card from DOM, reveal block content (no server call).
+    * "Abschalten" — POST disable_help (dismiss + deactivate config), then reload page.
 
     Context variables required for this template:
-    * question     {string}
-    * timelineurl  {string}
-    * dismissurl   {string}  Fallback href for non-JS environments.
-    * actionurl    {string}  Base URL for the AJAX POST action.
-    * instanceid   {int}
-    * courseid     {int}
-    * sesskey      {string}
-    * label_yes    {string}
-    * label_later  {string}
-    * label_no     {string}
+    * splash_title   {string}  Card heading.
+    * question       {string}  First text paragraph.
+    * question2      {string}  Second text paragraph (the question).
+    * managepageurl  {string}  URL for manage.php?courseid=X.
+    * actionurl      {string}  URL for action.php (POST endpoint).
+    * instanceid     {int}
+    * courseid       {int}
+    * sesskey        {string}
+    * label_yes      {string}
+    * label_later    {string}
+    * label_no       {string}
 
     Example context (json):
     {
-        "question": "Jetzt in der Kursablauf-Zentrale alle Termine einrichten?",
-        "timelineurl": "/local/coursectrl/timeline.php?courseid=2",
-        "dismissurl": "/blocks/coursectrldates/action.php?action=dismiss_help&instanceid=3&courseid=2",
-        "actionurl": "/blocks/coursectrldates/action.php",
-        "instanceid": 3,
-        "courseid": 2,
-        "sesskey": "abc123",
-        "label_yes": "Ja",
-        "label_later": "Später",
-        "label_no": "Nein"
+        "splash_title":  "Termin-Assistent",
+        "question":      "Sie scheinen neue Inhalte importiert zu haben.",
+        "question2":     "Möchten Sie jetzt alle neuen Termine einrichten?",
+        "managepageurl": "/local/coursectrl/manage.php?courseid=2",
+        "actionurl":     "/blocks/coursectrldates/action.php",
+        "instanceid":    3,
+        "courseid":      2,
+        "sesskey":       "abc123",
+        "label_yes":     "Ja",
+        "label_later":   "Nein",
+        "label_no":      "Abschalten"
     }
 }}
-<div class="block-coursectrldates-help mb-2"
+<div class="block-coursectrldates-splash card border-0 shadow-sm mb-2"
      data-region="coursectrldates-splash">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body py-3 px-3">
-            <div class="d-flex gap-2 align-items-start">
-                <span class="text-primary flex-shrink-0 mt-1">
-                    <i class="fa fa-calendar fa-fw fa-lg"></i>
-                </span>
-                <div class="flex-grow-1 min-w-0">
-                    <p class="mb-2 fw-semibold small text-body">{{question}}</p>
-                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                        <a href="{{timelineurl}}"
-                           class="btn btn-primary btn-sm"
-                           data-action="dismiss-help-and-go"
-                           data-action-url="{{actionurl}}"
-                           data-instanceid="{{instanceid}}"
-                           data-courseid="{{courseid}}"
-                           data-sesskey="{{sesskey}}">
-                            {{label_yes}}
-                        </a>
-                        <button type="button"
-                                class="btn btn-outline-secondary btn-sm"
-                                data-action="defer-help">
-                            {{label_later}}
-                        </button>
-                        <a href="{{dismissurl}}"
-                           class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
-                           data-action="dismiss-help"
-                           data-action-url="{{actionurl}}"
-                           data-instanceid="{{instanceid}}"
-                           data-courseid="{{courseid}}"
-                           data-sesskey="{{sesskey}}">
-                            {{label_no}}
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <div class="card-body py-3 px-3">
+        <h6 class="card-title fw-bold mb-2">{{splash_title}}</h6>
+        <p class="mb-1 small text-body">{{question}}</p>
+        <p class="mb-3 small text-body fw-semibold">{{question2}}</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{managepageurl}}"
+               class="btn btn-primary btn-sm block-coursectrldates-helpbtn"
+               data-action="dismiss-help-and-go"
+               data-action-url="{{actionurl}}"
+               data-instanceid="{{instanceid}}"
+               data-courseid="{{courseid}}"
+               data-sesskey="{{sesskey}}">
+                {{label_yes}}
+            </a>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm block-coursectrldates-helpbtn"
+                    data-action="defer-help">
+                {{label_later}}
+            </button>
+            <button type="button"
+                    class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
+                    data-action="disable-help"
+                    data-action-url="{{actionurl}}"
+                    data-instanceid="{{instanceid}}"
+                    data-courseid="{{courseid}}"
+                    data-sesskey="{{sesskey}}">
+                {{label_no}}
+            </button>
         </div>
     </div>
 </div>

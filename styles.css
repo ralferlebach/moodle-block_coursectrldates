@@ -26,3 +26,14 @@
 .block-coursectrldates-shiftbtn {
     min-width: 2.5rem;
 }
+
+/* Main block content: hidden while Termin-Assistent splash is active. */
+.block-coursectrldates-hidden {
+    display: none;
+}
+
+/* Termin-Assistent buttons: equal minimum width for visual alignment. */
+.block-coursectrldates-helpbtn {
+    min-width: 4.5rem;
+    text-align: center;
+}
