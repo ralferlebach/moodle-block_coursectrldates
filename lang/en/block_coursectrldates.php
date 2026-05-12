@@ -53,6 +53,7 @@ $string['no_events_count'] = 'No upcoming course dates found.';
 $string['open_timeline'] = 'Open timeline';
 $string['pluginname'] = 'Course dates';
 $string['privacy:metadata'] = 'The Course Dates block does not store any personal data of its own. The display state of the Scheduling Assistant is managed via Moodle\'s central user preferences API.';
+$string['privacy:metadata:preference:force_show'] = 'Stores whether the Scheduling Assistant should be force-shown on the next page load for a specific block instance.';
 $string['privacy:metadata:preference:splash_dismissed'] = 'Stores whether the Scheduling Assistant has been permanently dismissed for a specific block instance.';
 $string['shift_entry'] = 'Shift this date';
 $string['shift_following'] = 'Shift following dates';

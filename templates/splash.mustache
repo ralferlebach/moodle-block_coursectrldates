@@ -26,7 +26,7 @@
     Actions:
     * "Ja"         — POST dismiss + navigate to manage.php.
     * "Nein"       — remove card from DOM, reveal block content (no server call).
-    * "Abschalten" — POST disable_help (dismiss + deactivate config), then reload page.
+    * "Abschalten" — POST disable_help; only shown to users with addinstance capability.
 
     Context variables required for this template:
     * splash_title   {string}  Card heading.
@@ -77,6 +77,7 @@
                     data-action="defer-help">
                 {{label_later}}
             </button>
+            {{#canmanage}}
             <button type="button"
                     class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
                     data-action="disable-help"
@@ -86,6 +87,7 @@
                     data-sesskey="{{sesskey}}">
                 {{label_no}}
             </button>
+            {{/canmanage}}
         </div>
     </div>
 </div>

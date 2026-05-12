@@ -91,15 +91,16 @@ switch ($action) {
         break;
 
     case 'disable_help':
-        // Permanently dismiss the Termin-Assistent AND disable it in the block config.
+        // Requires elevated capability: changes instance config for all users.
+        require_capability('block/coursectrldates:addinstance', $blockcontext);
         $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
         $state->dismiss();
         update_block_show_help($instanceid, false);
         break;
 
     case 'reset_help':
-        // Reset dismissed state, set force-show flag, and re-enable the
-        // Termin-Assistent in case it was disabled via Abschalten.
+        // Requires elevated capability: changes instance config and preference.
+        require_capability('block/coursectrldates:addinstance', $blockcontext);
         $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
         $state->reset();
         $state->force();

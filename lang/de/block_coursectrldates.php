@@ -53,6 +53,7 @@ $string['no_events_count'] = 'Keine bevorstehenden Kurstermine gefunden.';
 $string['open_timeline'] = 'Timeline öffnen';
 $string['pluginname'] = 'Kurstermine';
 $string['privacy:metadata'] = 'Der Block „Kurstermine\" speichert keine eigenen personenbezogenen Daten. Der Anzeigestatus des Termin-Assistenten wird über die zentrale Benutzereinstellungs-API von Moodle verwaltet.';
+$string['privacy:metadata:preference:force_show'] = 'Speichert, ob der Termin-Assistent beim nächsten Seitenaufruf für eine bestimmte Block-Instanz einmalig angezeigt werden soll.';
 $string['privacy:metadata:preference:splash_dismissed'] = 'Speichert, ob der Termin-Assistent für eine bestimmte Block-Instanz dauerhaft ausgeblendet wurde.';
 $string['shift_entry'] = 'Diesen Termin verschieben';
 $string['shift_following'] = 'Folgende Termine verschieben';

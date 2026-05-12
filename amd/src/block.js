@@ -57,13 +57,16 @@ define([], function() {
             headers: {'X-Requested-With': 'XMLHttpRequest'},
         })
         .then(function(response) {
-            if (response.ok && helpcard) {
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            if (helpcard) {
                 helpcard.remove();
             }
             return null;
         })
         .catch(function() {
-            // Network or server error: preference was not stored.
+            // Network or server error: preference may not be stored.
             // Leave the helpcard visible so the user can retry on next page load.
             return null;
         });

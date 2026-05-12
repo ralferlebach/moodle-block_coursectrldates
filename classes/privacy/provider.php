@@ -53,7 +53,7 @@ class provider implements
         );
         $collection->add_user_preference(
             splash_state::FORCE_PREFIX,
-            'privacy:metadata:preference:splash_dismissed'
+            'privacy:metadata:preference:force_show'
         );
         return $collection;
     }
@@ -106,7 +106,7 @@ class provider implements
                 $pref->name,
                 $pref->value,
                 get_string(
-                    'privacy:metadata:preference:splash_dismissed',
+                    'privacy:metadata:preference:force_show',
                     'block_coursectrldates'
                 )
             );

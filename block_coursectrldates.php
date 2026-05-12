@@ -218,8 +218,13 @@ class block_coursectrldates extends block_base {
                 $actionurl = new \moodle_url('/blocks/coursectrldates/action.php');
                 $managepageurl = new \moodle_url('/local/coursectrl/manage.php');
                 $managepageurl->param('courseid', $courseid);
+                $canmanage = has_capability(
+                    'block/coursectrldates:addinstance',
+                    $this->context
+                );
                 $helpdata = [
                     'splash_title' => get_string('splash_title', 'block_coursectrldates'),
+                    'canmanage'    => $canmanage,
                     'question'     => get_string('help_question', 'block_coursectrldates'),
                     'question2'    => get_string('help_question2', 'block_coursectrldates'),
                     'managepageurl' => $managepageurl->out(false),
@@ -262,8 +267,13 @@ class block_coursectrldates extends block_base {
     public function instance_delete(): bool {
         global $DB;
 
-        $prefkey = \block_coursectrldates\local\splash_state::PREF_PREFIX . $this->instance->id;
-        $DB->delete_records('user_preferences', ['name' => $prefkey]);
+        $prefkeys = [
+            \block_coursectrldates\local\splash_state::PREF_PREFIX . $this->instance->id,
+            \block_coursectrldates\local\splash_state::FORCE_PREFIX . $this->instance->id,
+        ];
+        foreach ($prefkeys as $prefkey) {
+            $DB->delete_records('user_preferences', ['name' => $prefkey]);
+        }
 
         return parent::instance_delete();
     }

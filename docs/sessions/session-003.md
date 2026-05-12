@@ -1,132 +1,177 @@
 # block_coursectrldates – Session 003
 
-**Datum:** 2026-05-11
-**Repos:** moodle-block_coursectrldates (branch: development), moodle-local_coursectrl (branch: main)
-**Patch-Reihe:** 0.1.21 – 0.9.2
+**Datum:** 2026-05-11 / 2026-05-12
+**Repos:** moodle-block_coursectrldates (branch: development → main), moodle-local_coursectrl (branch: main)
+**Ergebnis:** Release 1.0.0 (MATURITY_STABLE, version 2026051200)
 
 ---
 
 ## Ausgangslage
 
-Alpha-Stand (0.1.20) mit mehreren Release-Blockern laut externem Review:
-falscher Privacy-Provider, falsche Capability-Strings, action.php ohne Cross-Course-Schutz,
-Kalenderwochen nicht angewendet, inkonsistente Defaults, tote Artefakte, fehlende Tests.
+Alpha-Stand 0.1.20 mit mehreren Release-Blockern: falscher Privacy-Provider,
+falsche Capability-Strings, fehlender Cross-Course-Schutz in action.php,
+Kalenderwochen nicht angewendet, inkonsistente Defaults, fehlende Tests.
 
 ---
 
-## Erledigte Arbeitspakete
+## Patch-Reihe
 
-### Patch 0.1.21 — Release-Blocker
+### 0.1.21 — Release-Blocker
 
-- **Privacy API**: `null_provider` → `metadata\provider` + `user_preference_provider`;
-  Export aller `block_coursectrldates_splash_dismissed_*`-Präferenzen per User
-- **Capability-Strings**: Tippfehler `blockcoursetrldates:*` → `coursectrldates:*` in EN + DE
-- **`action.php` — Dismiss-Bug**: `PARAM_ALPHA` strich Underscores → `dismiss_help` wurde `dismisshelp`
-  → User-Preference wurde nie gesetzt; Fix: `PARAM_ALPHAEXT`
-- **`action.php` — Cross-Course-Validierung**: Block-Instanz gegen `courseid` verifiziert
-- **`action.php` — Action-Whitelist**: Unbekannte Actions werfen `moodle_exception`
-- **`splash_state.php`**: `private const PREF_PREFIX` → `public const` für Privacy-Provider
+- **Privacy API**: `null_provider` → korrekter `metadata\provider` + `user_preference_provider`
+- **Capability-Strings**: `blockcoursetrldates:*` → `coursectrldates:*`
+- **`action.php`**: `PARAM_ALPHAEXT` (war PARAM_ALPHA, strich Underscores aus `dismiss_help`);
+  Block-Instanz gegen `courseid` verifiziert; Whitelist unbekannte Actions → `moodle_exception`
+- **`splash_state.php`**: `PREF_PREFIX` → `public const`
 
-### Patch 0.1.22 — Trigger-Logik + PHPUnit
+### 0.1.22 — Trigger-Logik + PHPUnit
 
-- **`classes/local/setup_help_detector.php`** (neu): `compute_show_help()` als eigenständige,
-  testbare Klasse mit `should_show(int $courseid, config_reader $config, array $cms): bool`
+- **`classes/local/setup_help_detector.php`** (neu): `should_show()` als testbare Klasse
 - **`tests/setup_help_detector_test.php`** (neu): 11 Tests für alle drei Trigger
 
-### Patch 0.1.23 — P0-Code-Fixes
+### 0.1.23 — Code-Fixes
 
-- **README.md**: Komplett neu; ersetzt „stub/placeholder"-Text
-- **`block_coursectrldates.php`**: Kalender mit `calendar_weeks()` begrenzt; `canshift`-Capability
-- **`classes/local/config_reader.php`**: Alle boolean Defaults auf `true` (kongruent mit `edit_form.php`)
-- **`templates/event_list.mustache`**: Shift-Buttons in `{{#canshift}}`; `aria-label` ergänzt
+- **`block_coursectrldates.php`**: Kalender mit `calendar_weeks()`; `canshift`-Capability
+- **`classes/local/config_reader.php`**: boolean Defaults auf `true`
+- **`templates/event_list.mustache`**: `{{#canshift}}`; `aria-label` ergänzt
 
-### Patch 0.1.24 — P0-Tests
+### 0.1.24–0.1.28 — Tests + Behat
 
-- **`tests/privacy_provider_test.php`** (neu): 4 Tests
-- **`tests/splash_state_test.php`** (neu): 8 Tests
-- **`tests/event_list_test.php`** (neu): 11 Tests
-
-### Patch 0.1.25 — CI, block.js, Lang-Cleanup
-
-- **`.github/workflows/moodle-ci.yml`** (neu): Development-CI, Matrix 4.5/5.0/5.1/5.2 × PHP 8.1–8.4
-- **`amd/src/block.js`**: `.catch()` entfernt Helpcard nicht bei Server-Fehler
-- **Lang-Strings**: 8 ungenutzte Strings entfernt
-
-### Patch 0.1.26–0.1.27 — Test-Korrekturen + PHPCS
-
-- `config_reader_test.php`: false→true für neue Defaults; `reset_help()` bleibt false
-- `event_list_test.php`: `$OUTPUT` → `$this->createMock(\renderer_base::class)`
-
-### Patch 0.1.28 — Behat
-
-- **`tests/behat/behat_block_coursectrldates.php`** (neu): 6 Custom-Steps
-- **`tests/behat/block_visibility.feature`** (neu): Teacher/Student-Sichtbarkeit
-- **`tests/behat/setup_help.feature`** (neu): Notification, Defer, Dismiss
+- **PHPUnit**: `privacy_provider_test`, `splash_state_test`, `event_list_test`,
+  `config_reader_test` (48 Tests, 114 Assertions)
+- **Behat**: `behat_block_coursectrldates.php` (Custom-Steps);
+  `block_visibility.feature`; `setup_help.feature`
 
 ### 0.8.0 / 0.8.1 — Beta
 
-- **0.8.0**: MATURITY_ALPHA → MATURITY_BETA
-- **0.8.1** (Bugfix-Welle):
-  - `$data['showhelp'] = $showhelp;` ergänzt (Einrichtungshilfe war funktionslos)
-  - `list_count()` auf MAX_LIST_COUNT=100 gedeckelt
-  - `local_coursectrl => ANY_VERSION` → `2026051100`
-  - README auf MATURITY_BETA aktualisiert
-  - **Makefile**: Komplett für Block adaptiert; PHPUnit-Auto-Reinit bei Versions-Mismatch
-  - **CI-Workflows**: `--extra-plugins` entfernt (verursachte "Failed to find tests/version.php");
-    `local_coursectrl` wird nach Install direkt in `moodle/local/coursectrl/` geklont
+- MATURITY_BETA; `$data['showhelp']` ergänzt (war unsichtbar);
+  `list_count()` auf MAX_LIST_COUNT=100 gedeckelt;
+  `local_coursectrl` Mindestversion `2026051100`;
+  **Makefile** mit PHPUnit-Auto-Reinit;
+  CI: `--extra-plugins` entfernt, `local_coursectrl` per Clone
 
-### 0.9.0-rc1 / 0.9.1 — RC-Vorbereitung
+### 0.9.0–0.9.2 — RC-Konsolidierung
 
-- **0.9.0-rc1**: MATURITY_RC; MAX_LIST_COUNT-Test; Session-Protokoll
-- **0.9.1**: `dismissHelp` auf POST mit FormData; MAX_LIST_COUNT-Constant in Konstantenblock
+- **0.9.0-rc1**: MATURITY_RC
+- **0.9.1**: POST-Dismiss (`dismissHelp` mit FormData);
+  `MAX_LIST_COUNT`-Konstante korrekt platziert
+- **0.9.2**: `usort()` vor `array_slice()`;
+  `instance_delete()` löscht User-Preferences;
+  `daykey` mit `userdate()` (User-Timezone);
+  Behat-Wait DOM-basiert;
+  Double-Docblock in `list_count()` entfernt;
+  `actionurl/instanceid/courseid/sesskey` in `helpdata` (POST-Grundlage)
 
-### 0.9.2 — RC-Konsolidierung (nach Review)
+### 0.9.3 — Termin-Assistent Reset-Button
 
-- **README.md**: `MATURITY_BETA` → `MATURITY_RC` (konsistent mit `version.php`)
-- **`block_coursectrldates.php`**:
-  - `usort()` vor `array_slice()` — explizite chronologische Sortierung nach timestamp/cmid/field
-  - `instance_delete()` ergänzt — löscht `splash_dismissed_<id>`-Preferences beim Blocklöschen
-- **`classes/local/config_reader.php`**: Doppelter Docblock vor `list_count()` entfernt
-- **`classes/output/event_list.php`**: `date('Y-m-d', $ts)` → `userdate($ts, '%Y-%m-%d')` —
-  daykey verwendet User-Zeitzone statt Server-Zeitzone
-- **`amd/src/block.js`**:
-  - `dismissHelp()` gibt Promise zurück (war void)
-  - „Ja"-Button: `e.preventDefault()` + `dismissHelp(...).then(navigate)` —
-    Race Condition behoben (Browser brach POST ab, sobald Navigation startete)
-- **`tests/behat/behat_block_coursectrldates.php`**: AJAX-Wait von
-  `document.readyState === "complete"` auf DOM-basierten Zustand
-  `querySelector('[data-region="coursectrldates-splash"]') === null` umgestellt
+- **`edit_form.php`**: `advcheckbox config_reset_help` → `<a>`-Button (sofort beim Klick)
+- **`action.php`**: `reset_help`-Case; `returnurl`-Parameter für Redirect
+- **`templates/calendar.mustache`**: Inline-Style → CSS-Klasse
+  *(Doppeltes `class`-Attribut als PHPCS-Fehler erst in 0.9.8 entdeckt und behoben)*
+- **`styles.css`**: `.block-coursectrldates-calrow`, `.block-coursectrldates-shiftbtn`
+- PHPCS, PHPUnit, ESLint grün
+
+### 0.9.4 — Force-Show-Mechanismus
+
+- **`classes/local/splash_state.php`**: `FORCE_PREFIX` + `force()` / `clear_force()` / `is_forced()`
+- **`block_coursectrldates.php`**: `is_forced()` vor `should_show()` geprüft; `clear_force()` nach Anzeige
+- **`action.php`**: `reset_help` ruft `force()` → Splash erscheint sofort unabhängig von Triggern
+- **Makefile**: `printf '%s\n'` statt `echo` (verhinderte `\c`-Truncation bei Testnamen)
+
+### 0.9.5 — ESLint + PHPDoc
+
+- **`block.js`**: `function (` → `function(` (11 Stellen);
+  Alignment-Spaces entfernt; `.catch()` nach `.then()` im btnYes-Handler
+- **`block_coursectrldates.php`**: Orphaned Docblock von `instance_config_save` entfernt
+
+### 0.9.6 — Termin-Assistent Redesign
+
+- **Umbenennung**: „Einrichtungshilfe" → „Termin-Assistent" (alle Lang-Strings)
+- **Button-Labels**: `help_later` = „Nein", `help_no` = „Abschalten"
+- **Splash als einziges Block-Element**: `mainhiddenclass` + `coursectrldates-main`-Wrapper;
+  „Nein" zeigt Hauptinhalt ohne Reload; „Abschalten" → POST + Reload
+- **`splash.mustache`**: neues Design ohne Icon; zwei Textabsätze; `managepageurl`
+- **`templates/block.mustache`** (neu): Wrapper mit `{{mainhiddenclass}}`
+- **`styles.css`**: `.block-coursectrldates-hidden`, `.block-coursectrldates-helpbtn`
+- **`config_reset_help_desc`** entfernt; Button als `static`-Element mit `hideIf`
+
+### 0.9.7 — Abschalten-Konfiguration
+
+- **`action.php`**: `disable_help`-Case + `update_block_show_help()`-Hilfsfunktion
+  (`phpcs:disable/enable` um `unserialize()`);
+  `disable_help` deaktiviert `show_help` in `block_instances.configdata`;
+  `reset_help` reaktiviert `show_help`
+- **`block.js`**: `dismissHelp` akzeptiert `action`-Parameter;
+  „Abschalten" sendet `action=disable_help`; `disable-help` data-action
+- **`templates/splash.mustache`**: „Abschalten" = `data-action="disable-help"`
+- **Makefile**: korrigiert für `block_coursectrldates` (war local_coursectrl-Kopie)
+
+### 0.9.8 — P0/P1-Review-Fixes
+
+- **P0.1 Rechtefehler**: `disable_help` und `reset_help` prüfen
+  `require_capability('block/coursectrldates:addinstance', $blockcontext)`;
+  `$canmanage` in `helpdata`; „Abschalten" in `{{#canmanage}}`
+- **P0.2 Behat**: Selektoren auf `disable-help` korrigiert; URL auf `manage.php`
+- **P1.1**: `instance_delete()` löscht auch `FORCE_PREFIX`-Preferences
+- **P1.2**: eigener Privacy-String `privacy:metadata:preference:force_show`
+- **P1.3**: `dismissHelp` wirft bei `!response.ok` statt still fortzufahren
+- **P1.4**: `calendar.mustache` doppeltes `class`-Attribut gemergt
+- **P1.5**: README „passing full test suite" → „prepared for final validation"
+- **Lang-Reihenfolge**: `force_show` alphabetisch korrekt vor `shift_entry`
+- **Behat PHPCS**: Öffnende-Brace-Leerzeile, `──`-Kommentare, multi-line if, Satzzeichen
+
+### Behat-Feature-Files (separat geliefert als patch-behat.zip)
+
+- **`setup_help.feature`**: aktualisiert für neue Button-Namen + `manage.php`
+- **`termin_assistent.feature`** (neu): 10 Szenarien für Splash-Exklusivität,
+  Nein/Abschalten-Flows, Config-State, Mehrbenutzer-Szenario, Ja-Navigation
+- **`block_visibility.feature`**: unverändert
 
 ---
 
-## CI-Stand (Ende Session)
+## CI-Stand (Release 1.0.0)
 
 | Prüfung | Ergebnis |
 |---|---|
-| PHPCS block_coursectrldates | ✅ sauber |
-| PHPUnit 47 Tests | ✅ grün |
-| ESLint block_coursectrldates | ✅ sauber |
-| Behat @block_coursectrldates | ✅ grün (lokal bestätigt) |
-| GitHub Actions CI | ⏳ 0.9.1 läuft; 0.9.2 ausstehend |
+| PHPCS `block_coursectrldates` | ✅ sauber |
+| PHPUnit | ✅ 48 Tests, 114 Assertions |
+| ESLint | ✅ sauber |
+| Mustache Lint | ✅ sauber |
+| Gherkin Lint | ✅ sauber |
+| Behat (lokal) | ✅ grün |
+| GitHub Actions CI | ✅ grün (0.9.8) |
 
 ---
 
-## Offene Punkte (nächste Session / Weg zu Stable)
+## Architekturentscheidungen
 
-1. **Action-Security-Test**: `action.php` Cross-Course-Schutz und Capability-Check per PHPUnit
-   absichern — erfordert Refactoring des Handler-Logik in testbare Klasse
-2. **`reset_help` Semantik klären**: Aktuell wird nur der eigene User-Status zurückgesetzt;
-   UI-String sollte das explizit benennen: „Einrichtungshilfe für mich erneut anzeigen"
-3. **Smoke-Test großer Kurs**: Performance mit 300–500 Aktivitäten manuell verifizieren
-4. **CI 0.9.2 grün** → dann `patch-1.0.0.zip` einspielen (liegt bereits vor)
+| Entscheidung | Begründung |
+|---|---|
+| `dismiss_help` bleibt User-only (User-Preference) | Kein Einfluss auf andere Nutzer |
+| `disable_help` ist instance-level + addinstance-Capability | Globale Deaktivierung nur für Bearbeitende |
+| `force_show` als separater Preference-Key | Ein-Shot-Anzeige ohne dauerhaftes Dismiss zu löschen |
+| `unserialize()` via phpcs:disable | Moodle-interne Daten, kein User-Input; kein sicherer Alternativweg |
+| `get_content()` nicht refaktoriert | P2-Item; für 1.0.0 kein Korrektheitsproblem; Post-1.0 als 1.1.0-Erstaufgabe |
+
+---
+
+## Offene Punkte (Post-1.0)
+
+1. **`get_content()` aufsplitten** in `event_filter.php`, `help_context_builder.php`
+   mit eigener PHPUnit-Abdeckung
+2. **`action_handler.php`** — Action-Logik aus `action.php` in testbare Klasse
+3. **Smoke-Tests** auf Moodle 4.5 und 5.2 mit großem Kurs (300–500 Aktivitäten)
+4. **Shift-Buttons-Behat** — Sichtbarkeit je nach `bulkaction`-Capability
 
 ---
 
 ## Kritische Regeln (weiterhin gültig)
 
 - **AMD-Build immer mitliefern** — Quelldatei allein hat keine Wirkung
-- **PHPUnit-Reinit** — Makefile erkennt Versions-Mismatch und reinit automatisch
-- **Lang-File-Pflege** — Python Extract-Sort-Rewrite-Pattern; nie str_replace auf Lang-Dateien
-- **CI-Dependency** — `local_coursectrl` nach Install klonen, nie via `--extra-plugins`
-- **Promise-Rückgabe** — `dismissHelp` gibt Promise zurück; Ja-Button navigiert erst nach Resolve
-- **Versionsplan**: CI 0.9.2 grün → `patch-1.0.0.zip` (liegt vor)
+- **Lang-Files**: direktes `str.replace()` auf verifizierten Quelldateien; nie aus `/tmp` lesen;
+  alphabetische Reihenfolge vor Abgabe prüfen
+- **Python-Rewriter verboten** — führte zu Komplettkorrumption aller Strings in Session
+- **`unserialize()` in Tests**: `phpcs:disable/enable` + `allowed_classes`-Option
+- **CI-Dependency**: `local_coursectrl` nach Install klonen, nie via `--extra-plugins`
+- **Makefile**: `printf '%s\n'` statt `echo` für Variablen mit Backslash
+- **promise/catch-or-return**: jede `.then()`-Kette braucht `.catch()` oder `return`
