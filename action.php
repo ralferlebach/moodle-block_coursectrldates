@@ -55,6 +55,12 @@ switch ($action) {
         $state->dismiss();
         break;
 
+    case 'reset_help':
+        // Reset dismissed state so the setup-help notification reappears.
+        $state = new block_coursectrldates\local\splash_state($instanceid, $USER->id);
+        $state->reset();
+        break;
+
     default:
         throw new moodle_exception('invalidaction', 'error');
 }
@@ -65,5 +71,8 @@ if ($isajax) {
     exit;
 }
 
-$returnurl = new moodle_url('/course/view.php', ['id' => $courseid]);
+$redirectparam = optional_param('returnurl', '', PARAM_LOCALURL);
+$returnurl = $redirectparam
+    ? new moodle_url($redirectparam)
+    : new moodle_url('/course/view.php', ['id' => $courseid]);
 redirect($returnurl);

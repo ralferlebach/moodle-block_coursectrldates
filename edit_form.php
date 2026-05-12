@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use block_coursectrldates\local\config_reader;
+
 /**
  * Instance configuration form.
  *
@@ -58,7 +60,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
             get_string('config_calendar_weeks', 'block_coursectrldates'),
             $weekoptions
         );
-        $mform->setDefault('config_calendar_weeks', 4);
+        $mform->setDefault('config_calendar_weeks', config_reader::DEFAULT_CALENDAR_WEEKS);
         $mform->hideIf('config_calendar_weeks', 'config_show_calendar', 'notchecked');
 
         // Event list section.
@@ -69,8 +71,14 @@ class block_coursectrldates_edit_form extends block_edit_form {
         );
 
         $modeoptions = [
-            'timewindow' => get_string('config_mode_timewindow', 'block_coursectrldates'),
-            'count'      => get_string('config_mode_count', 'block_coursectrldates'),
+            config_reader::MODE_TIMEWINDOW => get_string(
+                'config_mode_timewindow',
+                'block_coursectrldates'
+            ),
+            config_reader::MODE_COUNT => get_string(
+                'config_mode_count',
+                'block_coursectrldates'
+            ),
         ];
         $mform->addElement(
             'select',
@@ -78,7 +86,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
             get_string('config_list_mode', 'block_coursectrldates'),
             $modeoptions
         );
-        $mform->setDefault('config_list_mode', 'timewindow');
+        $mform->setDefault('config_list_mode', config_reader::MODE_TIMEWINDOW);
 
         $mform->addElement(
             'select',
@@ -86,8 +94,8 @@ class block_coursectrldates_edit_form extends block_edit_form {
             get_string('config_list_weeks', 'block_coursectrldates'),
             $weekoptions
         );
-        $mform->setDefault('config_list_weeks', 4);
-        $mform->hideIf('config_list_weeks', 'config_list_mode', 'neq', 'timewindow');
+        $mform->setDefault('config_list_weeks', config_reader::DEFAULT_LIST_WEEKS);
+        $mform->hideIf('config_list_weeks', 'config_list_mode', 'neq', config_reader::MODE_TIMEWINDOW);
 
         $mform->addElement(
             'text',
@@ -96,8 +104,8 @@ class block_coursectrldates_edit_form extends block_edit_form {
             ['size' => 4]
         );
         $mform->setType('config_list_count', PARAM_INT);
-        $mform->setDefault('config_list_count', 10);
-        $mform->hideIf('config_list_count', 'config_list_mode', 'neq', 'count');
+        $mform->setDefault('config_list_count', config_reader::DEFAULT_LIST_COUNT);
+        $mform->hideIf('config_list_count', 'config_list_mode', 'neq', config_reader::MODE_COUNT);
 
         // Setup-help section (Einrichtungshilfe).
         $mform->addElement(
@@ -120,7 +128,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
             get_string('config_help_window_weeks', 'block_coursectrldates'),
             $weekoptions
         );
-        $mform->setDefault('config_help_window_weeks', 4);
+        $mform->setDefault('config_help_window_weeks', config_reader::DEFAULT_HELP_WEEKS);
         $mform->hideIf('config_help_window_weeks', 'config_show_help', 'notchecked');
 
         // Trigger checkboxes.
@@ -148,13 +156,27 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->setDefault('config_help_trigger_timedeps', 1);
         $mform->hideIf('config_help_trigger_timedeps', 'config_show_help', 'notchecked');
 
-        // Manual reset.
-        $mform->addElement(
-            'advcheckbox',
-            'config_reset_help',
-            get_string('config_reset_help', 'block_coursectrldates')
-        );
-        $mform->setDefault('config_reset_help', 0);
-        $mform->hideIf('config_reset_help', 'config_show_help', 'notchecked');
+        // Manual reset: button link instead of checkbox so it acts immediately.
+        $reseturl = new \moodle_url('/blocks/coursectrldates/action.php', [
+            'action'     => 'reset_help',
+            'instanceid' => $this->block->instance->id,
+            'courseid'   => $this->block->page->course->id,
+            'sesskey'    => sesskey(),
+            'returnurl'  => $this->block->page->url->out_as_local_url(false),
+        ]);
+        $label    = get_string('config_reset_help', 'block_coursectrldates');
+        $desc     = get_string('config_reset_help_desc', 'block_coursectrldates');
+        $btnhtml  = '<div class="form-group row fitem">';
+        $btnhtml .= '<div class="col-md-3 col-form-label d-flex pb-0 pr-md-0"></div>';
+        $btnhtml .= '<div class="col-md-9 form-inline align-items-start felement">';
+        $btnhtml .= '<div>';
+        $btnhtml .= '<a href="' . $reseturl->out(false) . '"';
+        $btnhtml .= ' class="btn btn-outline-secondary btn-sm">';
+        $btnhtml .= htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+        $btnhtml .= '</a>';
+        $btnhtml .= '<div class="form-control-feedback">' . $desc . '</div>';
+        $btnhtml .= '</div></div></div>';
+        $mform->addElement('html', $btnhtml);
+        $mform->hideIf('config_show_help', 'config_show_help', 'notchecked');
     }
 }

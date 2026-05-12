@@ -179,4 +179,29 @@ class behat_block_coursectrldates extends behat_base {
             'document.querySelector(\'[data-region="coursectrldates-splash"]\') === null'
         );
     }
+
+    /**
+     * Click the accept button (Ja) on the setup-help notification.
+     *
+     * Waits for navigation to the Course Control Hub timeline.
+     *
+     * @When I accept the setup help notification
+     * @return void
+     */
+    public function i_accept_the_setup_help_notification(): void {
+        $selector = '[data-action="dismiss-help-and-go"]';
+        $node = $this->getSession()->getPage()->find('css', $selector);
+        if (!$node) {
+            throw new ExpectationException(
+                'Accept button (Ja) not found on the setup-help notification.',
+                $this->getSession()
+            );
+        }
+        $node->click();
+        // Wait until the page navigates to the Course Control Hub timeline.
+        $this->getSession()->wait(
+            5000,
+            'window.location.href.indexOf("/local/coursectrl/timeline.php") !== -1'
+        );
+    }
 }

@@ -43,3 +43,13 @@ Feature: Course dates block setup help notification
     # After reload it must stay gone — preference was saved server-side.
     When I am on "C1" course homepage
     Then the setup help notification should not be visible
+  @javascript
+  Scenario: Accepting the setup help notification navigates to timeline and persists
+    Given I log in as "teacher1"
+    And I am on "C1" course homepage
+    And the setup help notification should be visible
+    When I accept the setup help notification
+    Then the URL should contain "/local/coursectrl/timeline.php"
+    # After returning to the course page the notification must stay gone.
+    When I am on "C1" course homepage
+    Then the setup help notification should not be visible

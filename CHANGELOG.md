@@ -2,9 +2,9 @@
 
 All notable changes to `block_coursectrldates` are documented here.
 
-## [1.0.0] – 2026-05-11
+## [0.9.x] – 2026-05-11
 
-First stable release.
+Release candidate series. See git history for individual patch notes.
 
 ### Added
 - Mini calendar (1–6 configurable weeks from today) via `local_coursectrl` calendar grid builder
