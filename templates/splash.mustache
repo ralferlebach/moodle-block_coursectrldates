@@ -23,23 +23,27 @@
     not yet permanently dismissed it. Calendar and event list are hidden
     while this card is visible.
 
+    Actions are handled via the block_coursectrldates_block_action external
+    service called from AMD JavaScript (core/ajax). No form POST or action.php
+    URL is required in the template.
+
     Actions:
-    * "Ja"         — POST dismiss + navigate to manage.php.
+    * "Ja"         — external service dismiss_help + navigate to manage.php.
     * "Nein"       — remove card from DOM, reveal block content (no server call).
-    * "Abschalten" — POST disable_help; only shown to users with addinstance capability.
+    * "Abschalten" — external service disable_help + reload; only shown to users
+                     with addinstance capability.
 
     Context variables required for this template:
     * splash_title   {string}  Card heading.
     * question       {string}  First text paragraph.
     * question2      {string}  Second text paragraph (the question).
     * managepageurl  {string}  URL for manage.php?courseid=X.
-    * actionurl      {string}  URL for action.php (POST endpoint).
     * instanceid     {int}
     * courseid       {int}
-    * sesskey        {string}
     * label_yes      {string}
     * label_later    {string}
     * label_no       {string}
+    * canmanage      {bool}    Whether the user has addinstance capability.
 
     Example context (json):
     {
@@ -47,13 +51,12 @@
         "question":      "Sie scheinen neue Inhalte importiert zu haben.",
         "question2":     "Möchten Sie jetzt alle neuen Termine einrichten?",
         "managepageurl": "/local/coursectrl/manage.php?courseid=2",
-        "actionurl":     "/blocks/coursectrldates/action.php",
         "instanceid":    3,
         "courseid":      2,
-        "sesskey":       "abc123",
         "label_yes":     "Ja",
         "label_later":   "Nein",
-        "label_no":      "Abschalten"
+        "label_no":      "Abschalten",
+        "canmanage":     true
     }
 }}
 <div class="block-coursectrldates-splash card border-0 shadow-sm mb-2"
@@ -66,10 +69,8 @@
             <a href="{{managepageurl}}"
                class="btn btn-primary btn-sm block-coursectrldates-helpbtn"
                data-action="dismiss-help-and-go"
-               data-action-url="{{actionurl}}"
                data-instanceid="{{instanceid}}"
-               data-courseid="{{courseid}}"
-               data-sesskey="{{sesskey}}">
+               data-courseid="{{courseid}}">
                 {{label_yes}}
             </a>
             <button type="button"
@@ -81,10 +82,8 @@
             <button type="button"
                     class="btn btn-link btn-sm text-muted p-0 text-decoration-none"
                     data-action="disable-help"
-                    data-action-url="{{actionurl}}"
                     data-instanceid="{{instanceid}}"
-                    data-courseid="{{courseid}}"
-                    data-sesskey="{{sesskey}}">
+                    data-courseid="{{courseid}}">
                 {{label_no}}
             </button>
             {{/canmanage}}

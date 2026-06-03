@@ -215,7 +215,6 @@ class block_coursectrldates extends block_base {
                 // Clear force flag so it is a one-shot display.
                 $splashstate->clear_force();
 
-                $actionurl = new \moodle_url('/blocks/coursectrldates/action.php');
                 $managepageurl = new \moodle_url('/local/coursectrl/manage.php');
                 $managepageurl->param('courseid', $courseid);
                 $canmanage = has_capability(
@@ -228,10 +227,8 @@ class block_coursectrldates extends block_base {
                     'question'     => get_string('help_question', 'block_coursectrldates'),
                     'question2'    => get_string('help_question2', 'block_coursectrldates'),
                     'managepageurl' => $managepageurl->out(false),
-                    'actionurl'    => $actionurl->out(false),
                     'instanceid'   => $this->instance->id,
                     'courseid'     => $courseid,
-                    'sesskey'      => sesskey(),
                     'label_yes'    => get_string('help_yes', 'block_coursectrldates'),
                     'label_later'  => get_string('help_later', 'block_coursectrldates'),
                     'label_no'     => get_string('help_no', 'block_coursectrldates'),

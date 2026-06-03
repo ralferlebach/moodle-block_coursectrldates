@@ -19,55 +19,36 @@
  * Handles three responsibilities:
  *   1. Scroll the mini-calendar strip to the current month on page load.
  *   2. Scroll the event list to a specific day when a calendar cell is clicked.
- *   3. Manage setup-help notification actions (Ja / Später / Nein).
+ *   3. Manage Termin-Assistent notification actions (Ja / Nein / Abschalten).
  *
  * @module     block_coursectrldates/block
  * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['core/ajax'], function(Ajax) {
 
     'use strict';
 
     /**
-     * Dismiss the setup-help notification via AJAX.
+     * Call the block_action external service for a given action.
      *
-     * @param {Element} el           Element carrying POST action data-attributes.
-     * @param {Element} helpcard     Help card element to remove on success.
-     * @param {string}  [action]     POST action name (default: 'dismiss_help').
-     * @returns {Promise} Resolves when the request is complete.
+     * @param {string} action     Action name: 'dismiss_help' or 'disable_help'.
+     * @param {string} instanceid Block instance ID (string from data-attribute).
+     * @param {string} courseid   Course ID (string from data-attribute).
+     * @returns {Promise} Resolves when the server call is complete.
      */
-    var dismissHelp = function(el, helpcard, action) {
-        var actionurl = el.dataset.actionUrl || '';
-        var instanceid = el.dataset.instanceid || '';
-        var courseid = el.dataset.courseid || '';
-        var sess = el.dataset.sesskey || '';
-        if (!actionurl) {
-            return Promise.resolve(null);
-        }
-        var formdata = new FormData();
-        var actionname = action || 'dismiss_help';
-        formdata.append('action', actionname);
-        formdata.append('instanceid', instanceid);
-        formdata.append('courseid', courseid);
-        formdata.append('sesskey', sess);
-        return fetch(actionurl, {
-            method: 'POST',
-            body: formdata,
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
-        })
-        .then(function(response) {
-            if (!response.ok) {
-                throw new Error('Server returned ' + response.status);
-            }
-            if (helpcard) {
-                helpcard.remove();
-            }
-            return null;
-        })
-        .catch(function() {
-            // Network or server error: preference may not be stored.
-            // Leave the helpcard visible so the user can retry on next page load.
+    var callBlockAction = function(action, instanceid, courseid) {
+        var requests = Ajax.call([{
+            methodname: 'block_coursectrldates_block_action',
+            args: {
+                instanceid: parseInt(instanceid, 10),
+                courseid:   parseInt(courseid, 10),
+                action:     action,
+            },
+        }]);
+        return requests[0].catch(function() {
+            // Network or server error: state may not be saved.
+            // Swallow so the caller can still proceed with UI updates.
             return null;
         });
     };
@@ -75,9 +56,9 @@ define([], function() {
     /**
      * Attach delegated handlers for all three help-notification actions.
      *
-     *   data-action="dismiss-help-and-go"  — permanently dismiss + navigate.
+     *   data-action="dismiss-help-and-go"  — dismiss permanently, then navigate to managepageurl.
      *   data-action="defer-help"           — remove from DOM, no server call.
-     *   data-action="disable-help"         — disable Termin-Assistent + dismiss, then reload.
+     *   data-action="disable-help"         — disable Termin-Assistent for all users, then reload.
      *
      * @param {Element} root Block root element.
      * @returns {void}
@@ -86,13 +67,14 @@ define([], function() {
         root.addEventListener('click', function(e) {
             var helpcard = root.querySelector('[data-region="coursectrldates-splash"]');
 
-            // "Ja" — dismiss permanently and let default href navigation proceed.
+            // "Ja" — dismiss permanently and navigate to managepageurl.
             var btnYes = e.target.closest('[data-action="dismiss-help-and-go"]');
             if (btnYes) {
-                // Wait for POST to complete, then navigate — prevents race condition.
                 e.preventDefault();
                 var targeturl = btnYes.getAttribute('href');
-                dismissHelp(btnYes, null).then(function() {
+                var instanceid = btnYes.dataset.instanceid || '';
+                var courseid = btnYes.dataset.courseid || '';
+                callBlockAction('dismiss_help', instanceid, courseid).then(function() {
                     window.location.href = targeturl;
                     return null;
                 }).catch(function() {
@@ -102,14 +84,13 @@ define([], function() {
                 return;
             }
 
-            // "Später" — remove from DOM without a server call.
+            // "Nein" — remove from DOM without a server call.
             var btnLater = e.target.closest('[data-action="defer-help"]');
             if (btnLater) {
                 e.preventDefault();
                 if (helpcard) {
                     helpcard.remove();
                 }
-                // Reveal main block content hidden while splash was active.
                 var maincontent = root.querySelector('[data-region="coursectrldates-main"]');
                 if (maincontent) {
                     maincontent.classList.remove('block-coursectrldates-hidden');
@@ -117,12 +98,13 @@ define([], function() {
                 return;
             }
 
-            // "Nein" — permanently dismiss without navigation.
+            // "Abschalten" — disable Termin-Assistent for all users, then reload.
             var btnOff = e.target.closest('[data-action="disable-help"]');
             if (btnOff) {
                 e.preventDefault();
-                // Disable Termin-Assistent permanently, then reload to show normal content.
-                dismissHelp(btnOff, null, 'disable_help').then(function() {
+                var offinstanceid = btnOff.dataset.instanceid || '';
+                var offcourseid = btnOff.dataset.courseid || '';
+                callBlockAction('disable_help', offinstanceid, offcourseid).then(function() {
                     window.location.reload();
                     return null;
                 }).catch(function() {
