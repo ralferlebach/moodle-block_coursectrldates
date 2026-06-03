@@ -25,6 +25,7 @@ on:
 env:
   MOODLE_CI: '^4'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PGPASSWORD: postgres
 
 jobs:
 
