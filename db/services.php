@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version definition for block_coursectrldates.
+ * External service definitions for block_coursectrldates.
  *
  * @package    block_coursectrldates
  * @copyright  2026 Ralf Erlebach
@@ -24,12 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component    = 'block_coursectrldates';
-$plugin->version      = 2026060301;
-$plugin->requires     = 2024042200; // Moodle 4.5.
-$plugin->dependencies = [
-    'local_coursectrl' => 2026051100,
+$functions = [
+    'block_coursectrldates_block_action' => [
+        'classname'     => 'block_coursectrldates\external\block_action',
+        'methodname'    => 'execute',
+        'description'   => 'Dismiss or disable the Termin-Assistent splash for a block instance.',
+        'type'          => 'write',
+        'ajax'          => true,
+        'loginrequired' => true,
+    ],
 ];
-$plugin->supported = [405, 502]; // Moodle 4.5 through 5.2.
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.1.0';

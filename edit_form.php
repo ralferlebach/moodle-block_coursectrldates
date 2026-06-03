@@ -42,7 +42,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
         // Fully-qualified class alias for readability throughout this method.
         $cr = \block_coursectrldates\local\config_reader::class;
 
-        // ── Calendar ─────────────────────────────────────────────────────────
+        // Calendar settings section.
         $mform->addElement(
             'header',
             'configheader_calendar',
@@ -66,7 +66,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->setDefault('config_calendar_weeks', $cr::DEFAULT_CALENDAR_WEEKS);
         $mform->hideIf('config_calendar_weeks', 'config_show_calendar', 'notchecked');
 
-        // ── Event list ───────────────────────────────────────────────────────
+        // Event list settings section.
         $mform->addElement(
             'header',
             'configheader_events',
@@ -75,7 +75,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
 
         $modeoptions = [
             $cr::MODE_TIMEWINDOW => get_string('config_mode_timewindow', 'block_coursectrldates'),
-            $cr::MODE_COUNT      => get_string('config_mode_count',       'block_coursectrldates'),
+            $cr::MODE_COUNT => get_string('config_mode_count', 'block_coursectrldates'),
         ];
         $mform->addElement(
             'select',
@@ -104,7 +104,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->setDefault('config_list_count', $cr::DEFAULT_LIST_COUNT);
         $mform->hideIf('config_list_count', 'config_list_mode', 'neq', $cr::MODE_COUNT);
 
-        // ── Termin-Assistent ─────────────────────────────────────────────────
+        // Termin-Assistent settings section.
         $mform->addElement(
             'header',
             'configheader_help',
@@ -152,7 +152,7 @@ class block_coursectrldates_edit_form extends block_edit_form {
         $mform->hideIf('config_help_trigger_timedeps', 'config_show_help', 'notchecked');
 
         // Reset button: navigates directly to action.php so it works immediately
-        // without saving the config form.  Uses a safe constructed return URL
+        // without saving the config form. Uses a safe constructed return URL
         // instead of $this->page->url which may be null in AJAX modal context.
         $courseid   = (int) $this->page->course->id;
         $returnurl  = new \moodle_url('/course/view.php', ['id' => $courseid]);
