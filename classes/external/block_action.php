@@ -26,9 +26,9 @@ namespace block_coursectrldates\external;
 
 use block_coursectrldates\local\splash_state;
 use context_block;
-use external_api;
-use external_function_parameters;
-use external_value;
+use core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_value;
 
 /**
  * External API for dismissing or disabling the Termin-Assistent splash.
@@ -141,7 +141,7 @@ class block_action extends external_api {
         $config = !empty($record->configdata)
             ? unserialize(
                 base64_decode($record->configdata),
-                ['allowed_classes' => ['\stdClass']]
+                ['allowed_classes' => [\stdClass::class]]
             )
             : null;
         // phpcs:enable moodle.PHP.ForbiddenFunctions.Found

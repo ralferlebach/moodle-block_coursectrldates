@@ -2,6 +2,28 @@
 
 All notable changes to `block_coursectrldates` are documented here.
 
+## [1.1.1] – Moodle 5.3 support (2026101701)
+
+### Fixed
+- `styles.css`: Bootstrap 5 utilities used by the templates (`gap-*`, `fw-*`,
+  `lh-1`) are reproduced inside the block, so spacing and emphasis match on
+  Moodle 4.5 (Bootstrap 4.6) and 5.x (CCH-B04).
+- `classes/external/block_action.php`: imports `core_external\external_api`,
+  `external_function_parameters` and `external_value` instead of the legacy
+  global aliases, which are not loaded in AJAX requests. "Ja" and "Abschalten"
+  on the Termin-Assistent failed silently before.
+- `classes/external/block_action.php`: `allowed_classes` now uses
+  `\stdClass::class`; `'\stdClass'` produced an incomplete object, so
+  `disable_help` could not write `show_help`.
+
+### Added
+- `tests/external/block_action_test.php`: PHPUnit coverage for the service.
+
+### Changed
+- `version.php`: `requires` set to Moodle 4.5 (2024100700), `supported = [405, 503]`.
+- Behat features aligned with the English UI and core steps.
+- CI: Moodle 5.3 in the PHPUnit matrix; MariaDB 11.4 / PostgreSQL 17 services.
+
 ## [1.1.0] – Moodle Plugin Directory Review
 
 ### Added

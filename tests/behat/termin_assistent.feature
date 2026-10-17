@@ -116,7 +116,7 @@ Feature: Termin-Assistent splash behaviour and configuration
     And I am on "C1" course homepage
     And the setup help notification should be visible
     When I accept the setup help notification
-    Then the URL should contain "/local/coursectrl/manage.php"
+    Then the url should match "/local/coursectrl/manage\.php"
 
   @javascript
   Scenario: After clicking Ja the splash does not reappear when returning
