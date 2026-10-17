@@ -24,6 +24,8 @@ on:
 
 env:
   MOODLE_CI: '^4'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PGPASSWORD: postgres
 
 jobs:
 
@@ -66,7 +68,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:10.11
+        image: mariadb:11.4
         env:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
@@ -173,6 +175,7 @@ jobs:
           - MOODLE_500_STABLE
           - MOODLE_501_STABLE
           - MOODLE_502_STABLE
+          - MOODLE_503_STABLE
         php: ['8.1', '8.2', '8.3', '8.4']
         db:
           - { engine: mariadb, type: mariadb, port: 3306, user: root,   pass: root   }
@@ -186,12 +189,14 @@ jobs:
           - { moodle: MOODLE_502_STABLE, php: '8.1' }
           # Moodle 5.2 requires PHP 8.3+.
           - { moodle: MOODLE_502_STABLE, php: '8.2' }
+          - { moodle: MOODLE_503_STABLE, php: '8.1' }
+          - { moodle: MOODLE_503_STABLE, php: '8.2' }
           # Moodle 5.0 PHP 8.4 support — conservative, align with local_coursectrl.
           - { moodle: MOODLE_500_STABLE, php: '8.4' }
 
     services:
       mariadb:
-        image: mariadb:10.11
+        image: mariadb:11.4
         env:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
@@ -202,7 +207,7 @@ jobs:
           --health-retries=10
 
       pgsql:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_USER:     moodle
           POSTGRES_PASSWORD: moodle
@@ -282,7 +287,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:10.11
+        image: mariadb:11.4
         env:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']

@@ -38,3 +38,37 @@
     min-width: 4.5rem;
     text-align: center;
 }
+
+/* Bootstrap compatibility layer (Moodle 4.5 = Bootstrap 4.6, Moodle 5.x = Bootstrap 5).
+ * The templates use Bootstrap 5 utilities that Moodle 4.5 does not ship. Each
+ * rule reproduces the Bootstrap definition, scoped to this block; where the
+ * theme defines the utility (with !important) the theme wins with the same value.
+ */
+
+.block_coursectrldates .gap-1 {
+    gap: 0.25rem;
+}
+
+.block_coursectrldates .gap-2 {
+    gap: 0.5rem;
+}
+
+.block_coursectrldates .gap-3 {
+    gap: 1rem;
+}
+
+.block_coursectrldates .fw-normal {
+    font-weight: 400;
+}
+
+.block_coursectrldates .fw-semibold {
+    font-weight: 600;
+}
+
+.block_coursectrldates .fw-bold {
+    font-weight: 700;
+}
+
+.block_coursectrldates .lh-1 {
+    line-height: 1;
+}

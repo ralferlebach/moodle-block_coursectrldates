@@ -52,7 +52,7 @@ Feature: Course dates block Termin-Assistent notification
     And I am on "C1" course homepage
     And the setup help notification should be visible
     When I accept the setup help notification
-    Then the URL should contain "/local/coursectrl/manage.php"
+    Then the url should match "/local/coursectrl/manage\.php"
     # After returning to the course page the notification must stay gone.
     When I am on "C1" course homepage
     Then the setup help notification should not be visible
