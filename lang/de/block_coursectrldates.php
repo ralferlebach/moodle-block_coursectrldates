@@ -24,6 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['action_error_generic'] = 'Die Änderung konnte nicht gespeichert werden. Es wurde nichts geändert; bitte erneut versuchen.';
+$string['action_error_network'] = 'Keine Verbindung zum Server. Es wurde nichts geändert; bitte Verbindung prüfen und erneut versuchen.';
+$string['action_error_permission'] = 'Sie dürfen diese Änderung nicht vornehmen, oder Ihre Sitzung ist abgelaufen. Bitte Seite neu laden und erneut versuchen.';
+$string['action_error_timeout'] = 'Der Server hat nicht rechtzeitig geantwortet. Die Änderung wurde möglicherweise nicht gespeichert; bitte erneut versuchen.';
 $string['config_calendar_header'] = 'Kalender';
 $string['config_calendar_weeks'] = 'Anzahl Wochen';
 $string['config_events_header'] = 'Terminliste';
@@ -48,6 +52,8 @@ $string['help_no'] = 'Abschalten';
 $string['help_question'] = 'Sie scheinen neue Inhalte in diesen Kurs importiert zu haben und wir bieten Ihnen die Möglichkeit, deren Termine nun zu verschieben und anzupassen.';
 $string['help_question2'] = 'Möchten Sie jetzt in der Kursablauf-Zentrale alle neuen Termine einrichten?';
 $string['help_yes'] = 'Ja';
+$string['link_settings'] = 'Einstellungen';
+$string['link_view'] = 'Aktivität öffnen';
 $string['no_events'] = 'In den nächsten {$a} Wochen wurden keine Kurstermine gefunden.';
 $string['no_events_count'] = 'Keine bevorstehenden Kurstermine gefunden.';
 $string['open_timeline'] = 'Timeline öffnen';

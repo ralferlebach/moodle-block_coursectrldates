@@ -1,79 +1,88 @@
-# Course Dates Block (`block_coursectrldates`)
+# CourseCtrl Dates · `block_coursectrldates`
 
-A companion block for the [Course Control Hub](https://github.com/ralferlebach/moodle-local_coursectrl) (`local_coursectrl`) Moodle plugin. The block displays upcoming course activity dates directly on the course page and lets editing teachers open the Course Control Hub shift workflow without leaving the course.
+[![Moodle Plugin CI (development)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-dev.yml/badge.svg?branch=development)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-dev.yml?query=branch%3Adevelopment) [![Moodle Plugin CI (main)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-main.yml/badge.svg?branch=main)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-main.yml?query=branch%3Amain) [![Moodle 4.5–5.3](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-informational)](version.php)
 
-## Features
+[![CourseCtrl Hub](https://img.shields.io/badge/Plugin%20family-CourseCtrl%20Hub-3867d6)](https://github.com/ralferlebach/moodle-local_coursectrl) [![CourseCtrl Dates](https://img.shields.io/badge/Companion-CourseCtrl%20Dates-16a085)](https://github.com/ralferlebach/moodle-block_coursectrldates) [![Learn Tip](https://img.shields.io/badge/Companion-Learn%20Tip-8e44ad)](https://github.com/ralferlebach/moodle-block_coursectrllearntip)
 
-- **Mini calendar** — configurable 1–6 week view from today, highlighting days with upcoming activity dates
-- **Chronological event list** — groups upcoming dates by day → time slot → activity entry, sorted chronologically
-- **Shift buttons** — slot, following, and per-entry shift links that open `local_coursectrl/timeline.php` with the shift dialog pre-opened (only shown to users with `local/coursectrl:bulkaction` capability)
-- **Termin-Assistent** — context-aware notification card that appears when new course content is detected (course newly created or imported, reset, or time-dependent activities added); configurable triggers, time window, and dismiss behaviour
+CourseCtrl Dates is a compact Moodle course block showing scheduled activity dates, a mini calendar, and links into the Course Control Hub timeline and date-shift tools.
 
 ## Requirements
 
-- Moodle 4.5 – 5.2
-- PHP 8.1 or later
-- `local_coursectrl` 1.2.0 or later (version `2026051100`+)
+- **Moodle:** 4.5–5.3 declared by `version.php`; installation and tests verified locally on 4.5 and 5.3.
+- **Release:** `1.2.1` (`2026102100`), as declared in `version.php`.
+- **CI and release ZIP:** the workflows live in `.github/workflows/` of the repository and are not part of the release ZIP (export-ignore). Each release ZIP carries `RELEASE-MANIFEST.json` with commit, family versions and the tested matrix.
+- **Required plugin:** [`local_coursectrl`](https://github.com/ralferlebach/moodle-local_coursectrl) `1.4.0` (`2026102100`) or later, as declared in `version.php` (released together as one family).
+- **Install path:** `blocks/coursectrldates`.
+- **PHP/database:** follow requirements for the selected Moodle release; mixed branch versions are not a verified integration target.
+
+## Motivation
+
+Teachers need upcoming course deadlines and date-driven activity entry points without leaving their Moodle course page.
 
 ## Installation
 
-1. Copy or clone this repository into `blocks/coursectrldates/` inside your Moodle installation.
-2. Ensure `local_coursectrl` is installed and up to date.
-3. Visit **Site administration → Notifications** to trigger the plugin installation.
-4. Add the block to a course page via the block drawer.
+1. Install [Course Control Hub](https://github.com/ralferlebach/moodle-local_coursectrl) first in `local/coursectrl`.
+2. Install this plugin in `blocks/coursectrldates`.
+3. Visit **Site administration → Notifications**; add and configure the block on a course page.
 
-## Configuration
+See [Moodle plugin installation](https://docs.moodle.org/en/Installing_plugins).
 
-Each block instance can be configured independently:
+## Usage & settings
 
-| Setting | Description | Default |
-|---|---|---|
-| Show calendar | Show or hide the mini calendar | Yes |
-| Number of weeks (calendar) | Calendar range from today | 4 |
-| Display mode | Show a fixed number of events or a time window | Time window |
-| Time window (event list) | Weeks of events to display | 4 |
-| Number of events | Fixed event count (count mode, max 100) | 10 |
-| Enable Scheduling Assistant | Show the Termin-Assistent notification | Yes |
-| Trigger: newly created | Fire when course was created in the time window | Yes |
-| Trigger: course reset | Fire when course was reset in the time window | Yes |
-| Trigger: time-dependent activities | Fire when time-limited activities were added | Yes |
-| Time window (assistant) | How far back triggers look | 4 weeks |
+The block provides a **mini calendar**, chronological **activity-date list**, timeline shift links (visible according to CourseCtrl permissions), and a configurable **Termin-Assistent** setup-help card.
 
-## Termin-Assistent behaviour
+Per-instance settings include calendar visibility/weeks, list length/time horizon, help-card triggers and the assistant's time window. The help card offers *Ja* (open management), *Nein* (hide for this page view) and *Abschalten* (disable assistant for the block instance, with permission).
 
-When a trigger fires and the notification has not been dismissed, the block shows **only** the Termin-Assistent card — calendar and event list are hidden. Three actions are available:
+A known frontend defect can falsely proceed after AJAX failure; see [#6](https://github.com/ralferlebach/moodle-block_coursectrldates/issues/6). Configure permissions and validate on your installed combination before a production rollout.
 
-| Button | Effect |
-|---|---|
-| **Ja** | Dismisses permanently for the current user; navigates to `local_coursectrl/manage.php` |
-| **Nein** | Hides the card for this page view; calendar and event list appear immediately without a reload |
-| **Abschalten** | Requires editing rights (`addinstance` capability); dismisses permanently and deactivates the Termin-Assistent for the entire block instance |
+## Capabilities
 
-The **Termin-Assistent jetzt anzeigen** button in the block settings reactivates the Termin-Assistent and force-shows it on the next page load.
+Defined in [`db/access.php`](db/access.php):
+- `block/coursectrldates:view`: see the block.
+- `block/coursectrldates:addinstance`: add/configure it, including assistant shutdown.
+- `block/coursectrldates:myaddinstance`: system-level personal-dashboard capability, not enabled by default.
+- Shift actions additionally require `local/coursectrl:bulkaction`.
 
-## Architecture
+## Scheduled tasks
 
-The block is a thin frontend — all date data, calendar rendering, and URL construction for the shift workflow come from `local_coursectrl` APIs. The block itself does not modify any course data.
+No dedicated scheduled task is currently declared by this block; display data is supplied by the local plugin.
 
-```
-block_coursectrldates
-  → local_coursectrl\local\inventory\inventory_service
-  → local_coursectrl\local\analysis\date_collector
-  → local_coursectrl\local\analysis\calendar_grid_builder
-  → local_coursectrl\manager\calendar_manager
-```
+## How this plugin works / pitfalls
 
-Shift actions are handled entirely by `local_coursectrl/timeline.php`.
+The block consumes the local plugin's inventory, date collection, calendar and timeline services. It does **not** execute date shifts itself.
 
-## Privacy
+- Shared course-position/view/edit link semantics are being standardised in [Local #64](https://github.com/ralferlebach/moodle-local_coursectrl/issues/64) and [Block #7](https://github.com/ralferlebach/moodle-block_coursectrldates/issues/7).
+- Integration and Moodle-5.3 Behat matrix remain tracked in [#10](https://github.com/ralferlebach/moodle-block_coursectrldates/issues/10) and [#11](https://github.com/ralferlebach/moodle-block_coursectrldates/issues/11).
+- Individual help-card preferences are handled through Moodle's Privacy API. The block is not intended as an independent source of dates.
+- No external project homepage currently exists.
 
-The block stores no personal data of its own. Two Moodle user preferences per block instance are used to track dismiss and force-show state:
+## Theme support
 
-- `block_coursectrldates_splash_dismissed_<instanceid>` — permanent dismiss flag per user
-- `block_coursectrldates_force_show_<instanceid>` — one-shot force-display flag per user
+Targeted at Boost/Classic; validate your theme, accessibility and mobile display, especially across Moodle 4.5 (Bootstrap 4) and Moodle 5.x (Bootstrap 5).
 
-Both preferences are deleted when the block instance is removed. They are exported via Moodle's Privacy API.
+## Plugin repositories / related projects
 
-## License
+- **Source:** https://github.com/ralferlebach/moodle-block_coursectrldates
+- **Course Control Hub:** https://github.com/ralferlebach/moodle-local_coursectrl
+- **Planned Learn Tip:** https://github.com/ralferlebach/moodle-block_coursectrllearntip
+- **Template:** https://github.com/ralferlebach/moodle-plugintemplate
 
-GNU General Public License v3 or later — see [COPYING](https://www.gnu.org/licenses/gpl-3.0.html).
+## Bug reports, support & feature proposals
+
+Use [GitHub Issues](https://github.com/ralferlebach/moodle-block_coursectrldates/issues) or send a [Pull request](https://github.com/ralferlebach/moodle-block_coursectrldates/pulls). Include Moodle version, browser, steps and screenshots.
+
+## Moodle release support
+
+Declared `supported=[405,503]`; completion of the actual CI matrix and release checks is a separate prerequisite to production approval.
+
+## Translating this plugin
+
+English/German source strings in `lang/en/` and `lang/de/`; other languages via [AMOS](https://lang.moodle.org/).
+
+## Right-to-left support
+
+RTL browser testing is not yet complete.
+
+## Maintainer, copyright & licence
+
+Maintainer: **Ralf Erlebach**. Copyright © 2026 contributors as credited in the code. **GNU GPL v3 or later**.

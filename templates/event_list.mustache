@@ -52,7 +52,9 @@
                     "name": "Glossar",
                     "modname": "glossary",
                     "field": "Erinnerung in der Zeitleiste setzen",
-                    "activityurl": "/mod/glossary/view.php?id=5",
+                    "activityurl": "/course/section.php?id=3#module-5",
+                    "viewurl": "/mod/glossary/view.php?id=5",
+                    "settingsurl": "/course/modedit.php?update=5&return=1",
                     "shiftentryurl": "/local/coursectrl/timeline.php?courseid=2"
                 }]
             }]
@@ -106,8 +108,7 @@
                             justify-content-between py-1 px-0">
                     <span class="text-truncate me-2">
                         {{#pix}}monologo, mod_{{modname}}, {{modname}}{{/pix}}
-                        <a href="{{activityurl}}" target="_blank"
-                           rel="noopener noreferrer">{{name}}</a><br>
+                        <a href="{{activityurl}}" data-link="position">{{name}}</a>{{#viewurl}}<a href="{{viewurl}}" class="ms-1 text-decoration-none" title="{{#str}} link_view, block_coursectrldates {{/str}}" aria-label="{{#str}} link_view, block_coursectrldates {{/str}}: {{name}}" data-link="view"><i class="fa fa-search" aria-hidden="true"></i></a>{{/viewurl}}{{#settingsurl}}<a href="{{settingsurl}}" class="ms-1 text-decoration-none" title="{{#str}} link_settings, block_coursectrldates {{/str}}" aria-label="{{#str}} link_settings, block_coursectrldates {{/str}}: {{name}}" data-link="settings"><i class="fa fa-cog" aria-hidden="true"></i></a>{{/settingsurl}}<br>
                         <span class="badge bg-light border text-muted ms-1">
                             {{field}}
                         </span>

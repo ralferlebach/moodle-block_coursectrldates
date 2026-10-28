@@ -28,6 +28,7 @@ use advanced_testcase;
 use block_coursectrldates\local\config_reader;
 use block_coursectrldates\local\setup_help_detector;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\block_coursectrldates\local\setup_help_detector::class)]
 /**
  * Tests for setup_help_detector.
  *

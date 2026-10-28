@@ -32,7 +32,9 @@ Feature: Course dates block visibility and access control
 
   @javascript
   Scenario: Block shows no-events message when course has no dated activities
-    Given I log in as "teacher1"
+    # The Termin-Assistent splash hides the event list, so switch it off first.
+    Given the Termin-Assistent is disabled in the block config for "C1"
+    And I log in as "teacher1"
     When I am on "C1" course homepage
     Then the course dates event list should be visible
-    And I should see "No upcoming course dates"
+    And I should see "No course dates found"

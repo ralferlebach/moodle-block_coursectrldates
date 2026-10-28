@@ -24,6 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['action_error_generic'] = 'The change could not be saved. Nothing was changed; please try again.';
+$string['action_error_network'] = 'There is no connection to the server. Nothing was changed; check your connection and try again.';
+$string['action_error_permission'] = 'You are not allowed to make this change, or your session has expired. Reload the page and try again.';
+$string['action_error_timeout'] = 'The server did not answer in time. The change may not have been saved; please try again.';
 $string['config_calendar_header'] = 'Calendar';
 $string['config_calendar_weeks'] = 'Number of weeks';
 $string['config_events_header'] = 'Event list';
@@ -48,6 +52,8 @@ $string['help_no'] = 'Turn off';
 $string['help_question'] = 'You appear to have imported new content into this course. We offer you the opportunity to shift and adjust these dates.';
 $string['help_question2'] = 'Would you like to set up all new dates in the Course Control Hub now?';
 $string['help_yes'] = 'Yes';
+$string['link_settings'] = 'Settings';
+$string['link_view'] = 'Open activity';
 $string['no_events'] = 'No course dates found in the next {$a} weeks.';
 $string['no_events_count'] = 'No upcoming course dates found.';
 $string['open_timeline'] = 'Open timeline';

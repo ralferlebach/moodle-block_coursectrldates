@@ -29,6 +29,7 @@ use block_coursectrldates\privacy\provider;
 use core_privacy\local\metadata\collection;
 use core_privacy\tests\provider_testcase;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\block_coursectrldates\privacy\provider::class)]
 /**
  * Tests for the privacy provider.
  *

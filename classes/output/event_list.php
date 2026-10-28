@@ -150,13 +150,13 @@ class event_list implements renderable, templatable {
             }
 
             $modname = (string) ($event['modname'] ?? '');
-            if ($modname !== '') {
-                $aurl = new moodle_url('/mod/' . $modname . '/view.php');
-                $aurl->param('id', (int) ($event['cmid'] ?? 0));
-                $activityurl = $aurl->out(false);
-            } else {
-                $activityurl = $timelineurlstr;
-            }
+            // Family URL contract (#7, local #64): name to the course position, magnifier to the
+            // activity, cog to its settings; links the viewer cannot use stay empty.
+            $links = \local_coursectrl\local\navigation\activity_links::for_cmid(
+                $this->courseid,
+                (int) ($event['cmid'] ?? 0)
+            );
+            $activityurl = $links['position'] !== '' ? $links['position'] : $timelineurlstr;
 
             $daygroups[$daykey]['slots'][$slotkey]['entries'][] = [
                 'cmid'          => (int) ($event['cmid'] ?? 0),
@@ -165,6 +165,8 @@ class event_list implements renderable, templatable {
                 'field'         => (string) ($event['eventlabel'] ?? ''),
                 // Entry button: shifts only this CM + this specific field.
                 'activityurl'   => $activityurl,
+                'viewurl'       => $links['view'],
+                'settingsurl'   => $links['settings'],
                 'shiftentryurl' => $this->shift_url(
                     'entry',
                     0,

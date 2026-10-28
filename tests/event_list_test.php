@@ -27,6 +27,7 @@ namespace block_coursectrldates;
 use advanced_testcase;
 use block_coursectrldates\output\event_list;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\block_coursectrldates\output\event_list::class)]
 /**
  * Tests for event_list.
  *

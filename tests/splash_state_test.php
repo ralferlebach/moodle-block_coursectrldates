@@ -27,6 +27,7 @@ namespace block_coursectrldates;
 use advanced_testcase;
 use block_coursectrldates\local\splash_state;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\block_coursectrldates\local\splash_state::class)]
 /**
  * Tests for splash_state.
  *
