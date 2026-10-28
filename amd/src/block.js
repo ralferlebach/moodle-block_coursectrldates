@@ -25,32 +25,193 @@
  * @copyright  2026 Ralf Erlebach
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax'], function(Ajax) {
+define(['core/ajax', 'core/str'], function(Ajax, Str) {
 
     'use strict';
+
+    /** @var {number} Default time in ms after which a pending request counts as failed. */
+    var DEFAULT_TIMEOUT = 15000;
 
     /**
      * Call the block_action external service for a given action.
      *
+     * Resolves only when the server confirms the change (result === true).
+     * Rejects with an Error whose kind is 'offline', 'timeout', 'permission' or 'server' otherwise,
+     * so callers never treat a failed request as success.
+     *
      * @param {string} action     Action name: 'dismiss_help' or 'disable_help'.
      * @param {string} instanceid Block instance ID (string from data-attribute).
      * @param {string} courseid   Course ID (string from data-attribute).
-     * @returns {Promise} Resolves when the server call is complete.
+     * @param {number} timeout    Time in ms after which the request counts as failed.
+     * @returns {Promise} Resolves when the server confirmed the change.
      */
-    var callBlockAction = function(action, instanceid, courseid) {
-        var requests = Ajax.call([{
+    var callBlockAction = function(action, instanceid, courseid, timeout) {
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            return Promise.reject(failure('offline'));
+        }
+        var request = Ajax.call([{
             methodname: 'block_coursectrldates_block_action',
             args: {
                 instanceid: parseInt(instanceid, 10),
                 courseid:   parseInt(courseid, 10),
                 action:     action,
             },
-        }]);
-        return requests[0].catch(function() {
-            // Network or server error: state may not be saved.
-            // Swallow so the caller can still proceed with UI updates.
+        }])[0];
+        var timer = null;
+        var timed = new Promise(function(resolve, reject) {
+            timer = window.setTimeout(function() {
+                reject(failure('timeout'));
+            }, timeout);
+        });
+        return Promise.race([Promise.resolve(request), timed]).then(function(result) {
+            window.clearTimeout(timer);
+            if (result !== true) {
+                throw failure('server', result);
+            }
+            return true;
+        }, function(error) {
+            window.clearTimeout(timer);
+            if (error && error.kind) {
+                throw error;
+            }
+            throw failure(classifyError(error), error);
+        });
+    };
+
+    /**
+     * Build a failure error with its kind.
+     *
+     * @param {string} kind  offline | timeout | permission | server.
+     * @param {*}      cause Original rejection value.
+     * @returns {Error}
+     */
+    var failure = function(kind, cause) {
+        var error = new Error(kind);
+        error.kind = kind;
+        error.cause = cause;
+        return error;
+    };
+
+    /**
+     * Classify a core/ajax rejection.
+     *
+     * @param {object} error Rejection value of core/ajax.
+     * @returns {string} 'offline', 'permission' or 'server'.
+     */
+    var classifyError = function(error) {
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            return 'offline';
+        }
+        // A JSON exception carries an errorcode; a failed HTTP request rejects with the status text
+        // (Moodle 4.5, jQuery) or an Error "HTTP 403: Forbidden" (Moodle 5.x, fetch).
+        var code = '';
+        if (typeof error === 'string') {
+            code = error;
+        } else if (error && (error.errorcode || (error.exception && error.exception.errorcode))) {
+            code = error.errorcode || error.exception.errorcode;
+        } else if (error && error.message) {
+            code = error.message;
+        }
+        var permission = /nopermission|requirecapability|requirelogin|login|sesskey|invalidtoken|accessdenied/i;
+        if (permission.test(code) || /forbidden|unauthori[sz]ed|HTTP 40[13]/i.test(code)) {
+            return 'permission';
+        }
+        return 'server';
+    };
+
+    /**
+     * Show a localised, focusable error in the splash and re-enable its buttons.
+     *
+     * @param {Element} root  Block root element.
+     * @param {string}  kind  Failure kind.
+     * @returns {Promise}
+     */
+    var showError = function(root, kind) {
+        var keys = {
+            offline: 'action_error_network',
+            timeout: 'action_error_timeout',
+            permission: 'action_error_permission',
+            server: 'action_error_generic',
+        };
+        var key = keys[kind] || keys.server;
+        return Str.get_string(key, 'block_coursectrldates').then(function(text) {
+            var region = root.querySelector('[data-region="coursectrldates-splash-error"]');
+            if (region) {
+                region.textContent = text;
+                region.hidden = false;
+                region.focus();
+            }
+            return null;
+        }).catch(function() {
             return null;
         });
+    };
+
+    /**
+     * Mark the splash buttons as busy (or not).
+     *
+     * @param {Element} root Block root element.
+     * @param {Element|null} active The button whose request is pending.
+     * @param {boolean} busy Whether a request is pending.
+     * @returns {void}
+     */
+    var setBusy = function(root, active, busy) {
+        var splash = root.querySelector('[data-region="coursectrldates-splash"]');
+        if (!splash) {
+            return;
+        }
+        splash.setAttribute('aria-busy', busy ? 'true' : 'false');
+        splash.querySelectorAll('[data-action]').forEach(function(el) {
+            if (busy) {
+                el.setAttribute('aria-disabled', 'true');
+                el.classList.add('disabled');
+                if (el.tagName === 'BUTTON') {
+                    el.disabled = true;
+                }
+            } else {
+                el.removeAttribute('aria-disabled');
+                el.classList.remove('disabled');
+                if (el.tagName === 'BUTTON') {
+                    el.disabled = false;
+                }
+            }
+        });
+        if (!busy && active) {
+            active.focus();
+        }
+        if (busy) {
+            var region = root.querySelector('[data-region="coursectrldates-splash-error"]');
+            if (region) {
+                region.hidden = true;
+                region.textContent = '';
+            }
+        }
+    };
+
+    /**
+     * Run a server action; continue only on confirmed success, report every failure.
+     *
+     * @param {Element}  root      Block root element.
+     * @param {Element}  button    Clicked button or link.
+     * @param {string}   action    Server action.
+     * @param {Function} onsuccess Called after the server confirmed the change.
+     * @returns {Promise}
+     */
+    var runAction = function(root, button, action, onsuccess) {
+        if (button.getAttribute('aria-disabled') === 'true') {
+            return Promise.resolve(null);
+        }
+        var timeout = parseInt(root.dataset.ajaxTimeout || '', 10) || DEFAULT_TIMEOUT;
+        setBusy(root, button, true);
+        return callBlockAction(action, button.dataset.instanceid || '', button.dataset.courseid || '', timeout)
+            .then(function() {
+                onsuccess();
+                return null;
+            })
+            .catch(function(failure) {
+                setBusy(root, button, false);
+                return showError(root, failure && failure.kind ? failure.kind : 'server');
+            });
     };
 
     /**
@@ -59,6 +220,9 @@ define(['core/ajax'], function(Ajax) {
      *   data-action="dismiss-help-and-go"  — dismiss permanently, then navigate to managepageurl.
      *   data-action="defer-help"           — remove from DOM, no server call.
      *   data-action="disable-help"         — disable Termin-Assistent for all users, then reload.
+     *
+     * Navigation and reload happen only after the server confirmed the change; a failure
+     * keeps the splash, shows an accessible message and allows a retry.
      *
      * @param {Element} root Block root element.
      * @returns {void}
@@ -72,14 +236,8 @@ define(['core/ajax'], function(Ajax) {
             if (btnYes) {
                 e.preventDefault();
                 var targeturl = btnYes.getAttribute('href');
-                var instanceid = btnYes.dataset.instanceid || '';
-                var courseid = btnYes.dataset.courseid || '';
-                callBlockAction('dismiss_help', instanceid, courseid).then(function() {
+                runAction(root, btnYes, 'dismiss_help', function() {
                     window.location.href = targeturl;
-                    return null;
-                }).catch(function() {
-                    window.location.href = targeturl;
-                    return null;
                 });
                 return;
             }
@@ -102,14 +260,8 @@ define(['core/ajax'], function(Ajax) {
             var btnOff = e.target.closest('[data-action="disable-help"]');
             if (btnOff) {
                 e.preventDefault();
-                var offinstanceid = btnOff.dataset.instanceid || '';
-                var offcourseid = btnOff.dataset.courseid || '';
-                callBlockAction('disable_help', offinstanceid, offcourseid).then(function() {
+                runAction(root, btnOff, 'disable_help', function() {
                     window.location.reload();
-                    return null;
-                }).catch(function() {
-                    window.location.reload();
-                    return null;
                 });
                 return;
             }

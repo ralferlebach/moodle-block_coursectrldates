@@ -128,3 +128,17 @@ Feature: Termin-Assistent splash behaviour and configuration
     When I am on "C1" course homepage
     Then the setup help notification should not be visible
     And the main block content should be visible
+
+  # ── Roles ─────────────────────────────────────────────────────────────
+
+  @javascript
+  Scenario: Students are never offered the Termin-Assistent
+    Given the following "users" exist:
+      | username | firstname | lastname | email                |
+      | student1 | Student   | One      | student1@example.com |
+    And the following "course enrolments" exist:
+      | user     | course | role    |
+      | student1 | C1     | student |
+    When I am on the "C1" "Course" page logged in as "student1"
+    Then "[data-region='coursectrldates-splash']" "css_element" should not exist
+    And I should not see "Would you like to set up all new dates"

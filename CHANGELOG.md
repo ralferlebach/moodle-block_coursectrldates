@@ -2,6 +2,38 @@
 
 All notable changes to `block_coursectrldates` are documented here.
 
+## [1.2.1] – Re-audit fixes (2026102100)
+
+### Fixed
+- The Scheduling Assistant no longer treats failed requests as success: navigation and reload
+  happen only after the server confirmed the change; 403, 500, exceptions, offline and timeouts
+  show a localised, focused message and allow a retry (#6).
+- The assistant is only offered to users who may shift dates.
+
+### Changed
+- Event entries follow the family URL contract: name to the course position, magnifier to the
+  activity, cog to its settings, each only when the viewer may use it (#7).
+- Requires `local_coursectrl` 1.4.0 (2026102100); the family is released together.
+
+## [1.2.0] – Template CI and user stories (2026101800)
+
+### Changed
+- CI replaced by the plugin template pipelines (`moodle-plugin-ci-dev.yml`,
+  `moodle-plugin-ci-main.yml`, `playwright.yml`), identical for all CourseCtrl plugins;
+  `local_coursectrl` is registered once via `add-plugin`; no time-based runs.
+- Database services in CI without passwords; MariaDB 11.4 health check fixed. This
+  repairs the failing release workflow (`fe_sendauth: no password supplied`,
+  `Access denied for user 'root'`).
+- PHPUnit metadata as attributes (no PHPUnit 11 deprecations on Moodle 5.3).
+- Block renders through the page renderer instead of the global `$OUTPUT`.
+
+### Fixed
+- Month links in the calendar header: contrast 4.13:1 → body colour with underline (WCAG AA).
+
+### Added
+- Playwright user stories: upcoming dates, Scheduling Assistant via keyboard, 360 px and axe.
+- `db/removed_files.txt`, `tests/coverage.php`, `tools/coverage_gate.php`, `phpcs.xml`.
+
 ## [1.1.1] – Moodle 5.3 support (2026101701)
 
 ### Fixed

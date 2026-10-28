@@ -87,7 +87,7 @@ class block_coursectrldates extends block_base {
      * @return stdClass|null
      */
     public function get_content(): ?stdClass {
-        global $OUTPUT, $USER;
+        global $USER;
 
         if ($this->content !== null) {
             return $this->content;
@@ -198,7 +198,9 @@ class block_coursectrldates extends block_base {
         // Setup-help: evaluate triggers and dismissed state.
         $showhelp = false;
         $helpdata = null;
-        if ($config->show_help()) {
+        // The assistant leads to the shift dialog: only offer it to users who may shift dates.
+        $mayshift = has_capability('local/coursectrl:bulkaction', $coursecontext);
+        if ($config->show_help() && $mayshift) {
             $splashstate = new \block_coursectrldates\local\splash_state(
                 $this->instance->id,
                 $USER->id
@@ -239,7 +241,9 @@ class block_coursectrldates extends block_base {
         // Shift buttons: only show for users with bulk-action capability in local_coursectrl.
         $canshift = has_capability('local/coursectrl:bulkaction', $coursecontext);
 
-        $data = $eventlist->export_for_template($OUTPUT);
+        // The page renderer, not the global $OUTPUT: blocks can render during page setup.
+        $renderer = $this->page->get_renderer('core');
+        $data = $eventlist->export_for_template($renderer);
         $data['canshift']     = $canshift;
         $data['showhelp']      = $showhelp;
         $data['mainhiddenclass'] = $showhelp ? 'block-coursectrldates-hidden' : '';
@@ -248,7 +252,7 @@ class block_coursectrldates extends block_base {
         $data['hascalendar']  = !empty($months);
         $data['months']       = $months;
 
-        $this->content->text = $OUTPUT->render_from_template(
+        $this->content->text = $renderer->render_from_template(
             'block_coursectrldates/block',
             $data
         );

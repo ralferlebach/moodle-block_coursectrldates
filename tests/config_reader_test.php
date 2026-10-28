@@ -27,6 +27,7 @@ namespace block_coursectrldates;
 use advanced_testcase;
 use block_coursectrldates\local\config_reader;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\block_coursectrldates\local\config_reader::class)]
 /**
  * Tests for config_reader.
  *

@@ -72,3 +72,10 @@
 .block_coursectrldates .lh-1 {
     line-height: 1;
 }
+
+/* Month links on the coloured month header: inherit the dark body colour (WCAG AA contrast)
+   and keep an underline so they remain recognisable as links. */
+.block-coursectrldates .coursectrl-cal-monthlink {
+    color: inherit;
+    text-decoration: underline;
+}

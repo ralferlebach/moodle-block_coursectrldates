@@ -1,0 +1,138 @@
+{
+  "branch": "session-023",
+  "built_at": "2026-10-21T05:01:23+00:00",
+  "ci_workflows": [
+    "https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-dev.yml",
+    "https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-main.yml",
+    "https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/playwright.yml"
+  ],
+  "commit": "6093ae86c338a915645e9a34f7812d2b59807c8a",
+  "commit_date": "2026-10-21T04:59:33+00:00",
+  "component": "block_coursectrldates",
+  "dependencies": {
+    "local_coursectrl": 2026102100
+  },
+  "family": [
+    {
+      "commit": "e7b84938a3062a897d88c94731aaa365a62c56ea",
+      "component": "local_coursectrl",
+      "dependencies": {},
+      "maturity": "MATURITY_STABLE",
+      "release": "1.4.0",
+      "requires": 2024100700,
+      "supported": [
+        405,
+        503
+      ],
+      "version": 2026102100
+    },
+    {
+      "commit": "6093ae86c338a915645e9a34f7812d2b59807c8a",
+      "component": "block_coursectrldates",
+      "dependencies": {
+        "local_coursectrl": 2026102100
+      },
+      "maturity": "MATURITY_STABLE",
+      "release": "1.2.1",
+      "requires": 2024100700,
+      "supported": [
+        405,
+        503
+      ],
+      "version": 2026102100
+    },
+    {
+      "commit": "aff0d8b9ae3bbe789cc9a564976d9c4115378b20",
+      "component": "block_coursectrllearntip",
+      "dependencies": {
+        "local_coursectrl": 2026102100
+      },
+      "maturity": "MATURITY_ALPHA",
+      "release": "0.2.0",
+      "requires": 2024100700,
+      "supported": [
+        405,
+        503
+      ],
+      "version": 2026102100
+    }
+  ],
+  "files_sha256": {
+    "coursectrldates/.phpcsignore": "846063028e6baa0ea087eeb73fb2fd947e20b039b91f6a2a6e2f2b92314ae1f9",
+    "coursectrldates/CHANGELOG.md": "f6927d9faca965dba5b0497c2b230b3d3298b166dee8d07c8b997ed1830aaf8a",
+    "coursectrldates/README.md": "8c44f9476a983ecb3d66b06c3a7acc7d756f3f0b2812aff0617761a062cb6ac8",
+    "coursectrldates/action.php": "4b9af26c0c230640e22dade260efd4fc91efb1970bf4c8944aec8c829c7e12a3",
+    "coursectrldates/amd/build/block.min.js": "940acef03aa06c0353700967b6ee29d35924461f0e220d3cd4ca3f50195256fd",
+    "coursectrldates/amd/build/block.min.js.map": "95b43729cc19d32256b1967d35adf1058a598dd26d14d22766dabc1d6181d4d1",
+    "coursectrldates/amd/src/block.js": "6b0218fc971aa89a6bf312ce13509a96080c9e622892d525be31aa16e24ed353",
+    "coursectrldates/block_coursectrldates.php": "d4d0fbfe382fa39e21f4961e7e7adf99f7c8b5f687ed432e20fa32b25fb12d4c",
+    "coursectrldates/classes/external/block_action.php": "9e24990a7d12052d2b7bab1bca2de6a7940501bcffd1085e05ff39de0b1a22ff",
+    "coursectrldates/classes/local/config_reader.php": "1650d21b025035cd3b039e88d0fca6295896dcdfd5bcc3538040fd701dc9001e",
+    "coursectrldates/classes/local/setup_help_detector.php": "21bf972e14d5bea419b4d20d16aac4bb5db27a4a2941feedced37d7f1c2a8701",
+    "coursectrldates/classes/local/splash_state.php": "0f2decf016e69f3071b3780367814fd1004f7882e0b8b523fa5fc20fac11543c",
+    "coursectrldates/classes/output/event_list.php": "6b6e9da6ff46be5d112b462c17c836188d81bddb47f7961209dba88b832056e0",
+    "coursectrldates/classes/privacy/provider.php": "26812c056611fe4ed085f01a2e2c0bc7f71b5f75d1de380ba2484cede921fa55",
+    "coursectrldates/db/access.php": "46fba0520a6e15106cb87caebef2ee46c7517ae637267bcc6edbef9caf143196",
+    "coursectrldates/db/services.php": "935ee5879d91dfbca08521ba945636a3df101f66b075a8e5abf8f7dfb3e6b8db",
+    "coursectrldates/edit_form.php": "fb75a171452db61bc9524ab0d0ccffab41cc0a53a852e62606005e0d1402c5e3",
+    "coursectrldates/lang/de/block_coursectrldates.php": "8a5f237b32af3a319712dbfd9fbcba813d36cd8dd7ecb017d152f061897f47ea",
+    "coursectrldates/lang/en/block_coursectrldates.php": "9d6a0a473666909f3b3c47a8177624e043d674fbfb11742845217bce2e99e3ca",
+    "coursectrldates/styles.css": "6b6c63e91b5e5ca6fa9d5ba5f20d04d09e4c9a2fcac1531905cc86898b2d01e1",
+    "coursectrldates/templates/block.mustache": "ece3dc2a2c07f3c03d5a1fc42de1706db5005b3fc8147826602ec1535df3ea7f",
+    "coursectrldates/templates/calendar.mustache": "134fa64e89ae2c5d81ba289bbd276c81cdfd39697827bddd315cee6fd1b7a02e",
+    "coursectrldates/templates/event_list.mustache": "00920a9230c876d5491b661873217a8eea5dc284e1744b0f1dcfaefc91d40487",
+    "coursectrldates/templates/splash.mustache": "c4e3befdeba61b9469f1ce48da54fed6dd70d263c4669e447b74af544ac6332e",
+    "coursectrldates/tests/behat/behat_block_coursectrldates.php": "d9401782d6e6721f7328f80f8b96053025a4aba0a241a44f1b228e0186671796",
+    "coursectrldates/tests/behat/block_visibility.feature": "23546f2f4114b80f27670cd01ba639d79f24d2ff2fd8ebd21ee4a95be37c4a54",
+    "coursectrldates/tests/behat/setup_help.feature": "8d076021d938ce3652e97799df457e8d5f54ebeb17ba30588cb546cba21f434b",
+    "coursectrldates/tests/behat/termin_assistent.feature": "0cc3831d0f2448a9b63e462b6fc251c4cccc1c3522d1655eba27e732f2c43d1d",
+    "coursectrldates/tests/config_reader_test.php": "15fe8b9e754d4d496bfafa5266ca66723f8d45f9ef4a466b5f5162f8005ef0f9",
+    "coursectrldates/tests/coverage.php": "ad28fce48dbabc38a2564e88653f4709f9f132b324107cfc4f6271f2fd0810ea",
+    "coursectrldates/tests/event_list_test.php": "97c75fe419dfbf81fecc40dce07f9b7ec52525eade2954acd796086c99ed275e",
+    "coursectrldates/tests/external/block_action_test.php": "66c564cd6f233b7acdc67a001da091f30801fa9f77e64e2478a3bafa0f4c4665",
+    "coursectrldates/tests/privacy_provider_test.php": "e9fea1e1738ba58fb986f6c153937ce59c96f83711bd8bf0a6ad117a40c8280d",
+    "coursectrldates/tests/readme_test.php": "efbcef49e635eda59407cefa1af664c8a6fb09368a8e58dac245213c4fd50f18",
+    "coursectrldates/tests/setup_help_detector_test.php": "de343b3f3cdd84b9a060c067c17b8ca61ddacb2f890d6018218193ffcdbaecfd",
+    "coursectrldates/tests/splash_state_test.php": "3811b0637fc2c1d86da4c284b09b33e940082be0f6ac176c11dbb5ed78391218",
+    "coursectrldates/version.php": "afbcc4c20c48c1dfc63a9a47350c3de5f0fbf18660f791d035085b554c14f43e"
+  },
+  "maturity": "MATURITY_STABLE",
+  "release": "1.2.1",
+  "repository": "https://github.com/ralferlebach/moodle-block_coursectrldates",
+  "requires": 2024100700,
+  "supported": [
+    405,
+    503
+  ],
+  "verification": {
+    "coverage_lines_moodle45": {
+      "block_coursectrldates": "61.1%",
+      "block_coursectrllearntip": "96.2%",
+      "local_coursectrl": "72.3%"
+    },
+    "date": "2026-10-21",
+    "environment": "local container; PHP 8.3.6",
+    "github_actions": "not yet run (no push from the build environment)",
+    "matrix": [
+      {
+        "behat": "95 scenarios / 1101 steps passed",
+        "db": "PostgreSQL 16",
+        "fresh_install_from_zip": "passed",
+        "lint": "phplint, phpdoc, validate, savepoints, mustache, phpcs --max-warnings 0, grunt --max-lint-warnings 0",
+        "moodle": "4.5.15 (Build 20261005)",
+        "phpunit": "886 passed",
+        "playwright": "local 10, dates 12, learntip 4 passed"
+      },
+      {
+        "behat": "95 scenarios / 1101 steps passed",
+        "db": "PostgreSQL 17",
+        "fresh_install_from_zip": "passed",
+        "lint": "phplint, phpdoc, validate, savepoints, mustache, phpcs --max-warnings 0, grunt --max-lint-warnings 0",
+        "moodle": "5.3+ (Build 20261013)",
+        "phpunit": "886 passed, no deprecations",
+        "playwright": "local 10, dates 12, learntip 4 passed"
+      }
+    ]
+  },
+  "version": 2026102100
+}

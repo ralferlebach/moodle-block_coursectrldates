@@ -27,6 +27,7 @@ namespace block_coursectrldates\external;
 use advanced_testcase;
 use block_coursectrldates\local\splash_state;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\block_coursectrldates\external\block_action::class)]
 /**
  * Tests for block_action.
  *

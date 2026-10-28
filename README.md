@@ -1,6 +1,6 @@
 # CourseCtrl Dates · `block_coursectrldates`
 
-[![Moodle Plugin CI](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-ci.yml/badge.svg?branch=development)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-ci.yml?query=branch%3Adevelopment) [![Moodle 4.5–5.3](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-informational)](version.php)
+[![Moodle Plugin CI (development)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-dev.yml/badge.svg?branch=development)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-dev.yml?query=branch%3Adevelopment) [![Moodle Plugin CI (main)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-main.yml/badge.svg?branch=main)](https://github.com/ralferlebach/moodle-block_coursectrldates/actions/workflows/moodle-plugin-ci-main.yml?query=branch%3Amain) [![Moodle 4.5–5.3](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-informational)](version.php)
 
 [![CourseCtrl Hub](https://img.shields.io/badge/Plugin%20family-CourseCtrl%20Hub-3867d6)](https://github.com/ralferlebach/moodle-local_coursectrl) [![CourseCtrl Dates](https://img.shields.io/badge/Companion-CourseCtrl%20Dates-16a085)](https://github.com/ralferlebach/moodle-block_coursectrldates) [![Learn Tip](https://img.shields.io/badge/Companion-Learn%20Tip-8e44ad)](https://github.com/ralferlebach/moodle-block_coursectrllearntip)
 
@@ -8,8 +8,10 @@ CourseCtrl Dates is a compact Moodle course block showing scheduled activity dat
 
 ## Requirements
 
-- **Moodle:** 4.5–5.3 declared by `version.php` (`1.1.1`, `2026101701` on `development`; CI verification remains outstanding).
-- **Required plugin:** [`local_coursectrl`](https://github.com/ralferlebach/moodle-local_coursectrl), minimum plugin version `2026051100` as currently declared in `version.php`.
+- **Moodle:** 4.5–5.3 declared by `version.php`; installation and tests verified locally on 4.5 and 5.3.
+- **Release:** `1.2.1` (`2026102100`), as declared in `version.php`.
+- **CI and release ZIP:** the workflows live in `.github/workflows/` of the repository and are not part of the release ZIP (export-ignore). Each release ZIP carries `RELEASE-MANIFEST.json` with commit, family versions and the tested matrix.
+- **Required plugin:** [`local_coursectrl`](https://github.com/ralferlebach/moodle-local_coursectrl) `1.4.0` (`2026102100`) or later, as declared in `version.php` (released together as one family).
 - **Install path:** `blocks/coursectrldates`.
 - **PHP/database:** follow requirements for the selected Moodle release; mixed branch versions are not a verified integration target.
 
